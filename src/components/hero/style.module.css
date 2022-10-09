@@ -1,0 +1,15 @@
+.hero{
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+    width: 100%;
+} 
+  
+.img{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+} 

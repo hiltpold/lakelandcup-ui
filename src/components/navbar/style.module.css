@@ -1,0 +1,26 @@
+.spacer {
+    position: sticky;
+    height: 1rem;
+    background: #fff;
+    z-index: 99;
+    top: 4rem;
+}
+
+.logo {
+    height: 3rem;
+    width: auto;
+    object-fit: contain;
+    border: none;
+}
+  
+.navbar{
+    height: 4rem;
+    background: #fff;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    z-index: 99;
+    position: sticky;
+    top: 0;
+}
