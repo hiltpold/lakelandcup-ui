@@ -6,17 +6,17 @@ interface Props {
     authHandler?: string;
 }
 
-const Login: FunctionalComponent<Props> = (props: Props) => {
-    const [user, setTUser] = useState<string>("");
+const SignIn: FunctionalComponent<Props> = (props: Props) => {
+    const [user, setUser] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     useEffect(() => {
-        console.log("<LOGIN>");
+        console.log("<Sign In>");
         // handle session
     }, []);
     return (
         <div className={`container `}>
             <div className="columns">
-                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.login}`}>
+                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.signin}`}>
                     <div className="form-group">
                         <label className="form-label"> 
                             <input className="form-input lakelandcup-input-form" type="text" placeholder="username" onChange={()=>{}} />
@@ -26,7 +26,7 @@ const Login: FunctionalComponent<Props> = (props: Props) => {
                         </label>
                         <label className="form-label"> 
                             <button className="btn" onClick={()=>{}} >
-                                Login
+                                Sign In
                             </button>
                         </label>
                         <div>
@@ -41,7 +41,7 @@ const Login: FunctionalComponent<Props> = (props: Props) => {
         </div>
     );
 };
-export default Login;
+export default SignIn;
 
 /*
 import Redirect from './redirect'

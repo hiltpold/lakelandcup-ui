@@ -17,7 +17,7 @@ const formReducer = (state: State, action: Action ) => {
     }
 }
 
-const Signup: FunctionalComponent = () => {
+const SignUp: FunctionalComponent = () => {
     const [passwordEquality, setPasswordEquality] = useState<boolean>(true);
     const [formData, setFormData] = useReducer(formReducer, {user:"", password:"", passwordConfirmation:""});
     const [submitting, setSubmitting] = useState<boolean>(false);
@@ -48,17 +48,6 @@ const Signup: FunctionalComponent = () => {
                 }
             });
             console.log(profile);
-            /*
-            fetch(`https://${config.OKTA_DOMAIN}/api/v1/users?activate=true`, { 
-                method: 'post', 
-                headers: new Headers({
-                   "Accept": "application/json",
-                   "Content-Type": "application/json",
-                   "Authorization": `SSWS ${config.OKTA_ACCESS_TOKEN}`
-                }), 
-                body: profile
-              });
-            */
         } else {
             setPasswordEquality(match);
         }
@@ -77,7 +66,7 @@ const Signup: FunctionalComponent = () => {
     return (
         <div className={`container `}>
             <div className="columns">
-                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.login}`}>
+                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.signup}`}>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className={`form-label ${style.label}`}>
@@ -100,7 +89,7 @@ const Signup: FunctionalComponent = () => {
                             </label>
                             <label className="form-label"> 
                                 <button className="btn">
-                                    Register
+                                    Sign Up
                                 </button>
                             </label>
                         </div>
@@ -110,4 +99,4 @@ const Signup: FunctionalComponent = () => {
         </div>
     );
 };
-export default Signup;
+export default SignUp;

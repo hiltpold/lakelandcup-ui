@@ -8,11 +8,11 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import dotenv from "dotenv";
 
 dotenv.config( {
-    path: path.join(__dirname, '.dev.env')
+    path: path.join(__dirname, '.prod.env')
  });
 
 const config: Configuration = {
-  mode: "development",
+  mode: "production",
   output: {
     publicPath: "/",
   },
@@ -66,16 +66,12 @@ const config: Configuration = {
     new DefinePlugin({ 
         "process.env.BASE_URL_AUTH_SERVICE": JSON.stringify(process.env.BASE_URL_AUTH_SERVICE),
     })
-
   ],
-
-  devtool: "inline-source-map",
-  devServer: {
-    static: path.join(__dirname, "build"),
-    historyApiFallback: true,
-    port: process.env.PORT,
-    open: false,
-    hot: true,
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
   },
+  devtool: false,
 };
 export default config;

@@ -8,7 +8,7 @@ const Navbar: FunctionalComponent= () => {
             <section className="navbar-section" />
             <section className="navbar-center">
                 <a className="btn btn-link text-dark" href="/league"> League </a>
-                <a className="btn btn-link text-dark" href="/login"> Login </a>
+                <a className="btn btn-link text-dark" href="/signin"> Sign In </a>
             </section>
             <section className="navbar-section" />
         </header>

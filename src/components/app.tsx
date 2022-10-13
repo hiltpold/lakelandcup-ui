@@ -7,8 +7,8 @@ import League from "../routes/league";
 import Prospects from "../routes/prospects";
 import Home from "../routes/home";
 import NotFound from "../routes/notfound";
-import Login from "../routes/login";
-import Signup from "../routes/signup";
+import SignIn from "../routes/signin";
+import SignUp from "../routes/signup";
 
 const App: FunctionalComponent = () => {
     return (
@@ -18,8 +18,8 @@ const App: FunctionalComponent = () => {
             <Router>
                 <Home path="/" />
                 <League path="/league" />
-                <Login path="/login" />
-                <Signup path="/signup" />
+                <SignIn path="/signin" />
+                <SignUp path="/signup" />
                 <NotFound default />
             </Router>
         </div>
