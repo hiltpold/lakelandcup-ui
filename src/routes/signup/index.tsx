@@ -3,9 +3,11 @@ import {useState, useEffect, useReducer} from "preact/hooks";
 import style from "./style.module.css";
 
 type State = {
-  user: string;
-  password: string;
-  passwordConfirmation: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    passwordConfirmation: string;
 }
  
 type Action = { type: "SET_FORM",  payload: {name: string, value: string} }
@@ -17,9 +19,13 @@ const formReducer = (state: State, action: Action ) => {
     }
 }
 
+function isValidEmail(email: string) {
+    return /\S+@\S+\.\S+/.test(email);
+  }
+
 const SignUp: FunctionalComponent = () => {
-    const [passwordEquality, setPasswordEquality] = useState<boolean>(true);
-    const [formData, setFormData] = useReducer(formReducer, {user:"", password:"", passwordConfirmation:""});
+    const [passwordEquality, setPasswordEquality] = useState<boolean>(false);
+    const [formData, setFormData] = useReducer(formReducer, {firstName:"", lastName:"", email:"",password:"", passwordConfirmation:""});
     const [submitting, setSubmitting] = useState<boolean>(false);
 
     const handleChange = ({currentTarget}: JSX.TargetedEvent<HTMLInputElement, Event>) => {
@@ -31,35 +37,30 @@ const SignUp: FunctionalComponent = () => {
     }
 
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
+
         event.preventDefault();
-        const match = formData.password == formData.passwordConfirmation;
-        if (match && formData.password.length > 8) {
+        const passwordMatch = formData.password == formData.passwordConfirmation;
+        const passwordhasLength = formData.password.length >= 8
+        const emailIsValid = isValidEmail(formData.email)
+        const namesAreValid = (formData.firstName.length > 0 && formData.lastName.length> 0)
+
+        if (passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
+            console.log("hallo")
             setSubmitting(true);
-            setPasswordEquality(match);
-            const profile = JSON.stringify({
-                    profile: {
-                      firstName: "Isaac",
-                      lastName: "Brock",
-                      email: "isaac.brock@example.com",
-                      login: "isaac.brock@example.com",
-                    },
-                    credentials: {
-                        password : { value: "test" }
-                }
-            });
-            console.log(profile);
+            //setPasswordEquality(match);
         } else {
-            setPasswordEquality(match);
+            //setPasswordEquality(match);
         }
-       
-        console.log(event);
+        console.log(formData)
+        console.log(submitting);
         setTimeout(() => {
           setSubmitting(false);
         }, 3000)
     }
 
     useEffect(() => {
-        console.log("<LOGIN>");
+        console.log("<SIGNUP>");
+        console.log(formData)
         // handle session
     }, []);
 
@@ -70,11 +71,29 @@ const SignUp: FunctionalComponent = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className={`form-label ${style.label}`}>
+                                First Name
+                            </label>
+                            <label className="form-label"> 
+                                <input className="form-input lakelandcup-input-form" name="firstName" type="text" placeholder="first name" onChange={handleChange} />
+                            </label>
+                            <label className={`form-label ${style.label}`}>
+                                Last Name
+                            </label>
+                            <label className="form-label"> 
+                                <input className="form-input lakelandcup-input-form" name="lastName" type="text" placeholder="last name" onChange={handleChange} />
+                            </label>
+                                {
+                                    !(formData.firstName.length > 0 && formData.lastName.length> 0) ? <p class="form-input-hint"> Please enter a first and last name! </p> : null
+                                }
+                            <label className={`form-label ${style.label}`}>
                                 Email
                             </label>
                             <label className="form-label"> 
-                                <input className="form-input lakelandcup-input-form" name="user" type="text" placeholder="email" onChange={handleChange} />
+                                <input className="form-input lakelandcup-input-form" name="email" type="text" placeholder="email" onChange={handleChange} />
                             </label>
+                                {
+                                    (!isValidEmail(formData.email)) ? <p class="form-input-hint"> Please enter a valid email! </p> : null
+                                }
                             <label className={`form-label ${style.label}`}>
                                 Password
                             </label>
@@ -83,7 +102,7 @@ const SignUp: FunctionalComponent = () => {
                             <label className="form-label"> 
                                 <input className="form-input lakelandcup-input-form" name="passwordConfirmation" type="password" placeholder="confirm password" onChange={handleChange} />
                                 {
-                                    (!passwordEquality || formData.password.length < 8) ? <p class="form-input-hint"> Password doe not match or is less than 8 characters! </p> : null
+                                    (!(formData.password == formData.passwordConfirmation) || formData.password.length < 8) ? <p class="form-input-hint"> Password does not match or is less than 8 characters! </p> : null
                                 }
                             </label>
                             </label>
