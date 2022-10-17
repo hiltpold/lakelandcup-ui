@@ -37,16 +37,16 @@ const SignUp: FunctionalComponent = () => {
     }
 
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
-
         event.preventDefault();
+
         const passwordMatch = formData.password == formData.passwordConfirmation;
         const passwordhasLength = formData.password.length >= 8
         const emailIsValid = isValidEmail(formData.email)
-        const namesAreValid = (formData.firstName.length > 0 && formData.lastName.length> 0)
+        const namesAreValid = (formData.firstName.length > 0 && formData.lastName.length > 0)
 
         if (passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
             console.log("hallo")
-            setSubmitting(true);
+            //setSubmitting(true);
             //setPasswordEquality(match);
         } else {
             //setPasswordEquality(match);
@@ -59,9 +59,7 @@ const SignUp: FunctionalComponent = () => {
     }
 
     useEffect(() => {
-        console.log("<SIGNUP>");
-        console.log(formData)
-        // handle session
+        console.log("<SignUp>");
     }, []);
 
     return (

@@ -1,17 +1,19 @@
 import { FunctionalComponent, h } from "preact";
 import {useState, useEffect} from "preact/hooks";
 import style from "./style.module.css";
+import authContext from '../../contexts';
 
 interface Props {
     authHandler?: string;
 }
 
 const SignIn: FunctionalComponent<Props> = (props: Props) => {
+    const [isAuthenticated, setIsAuthenticated] = useState(authContext);
+
     const [user, setUser] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     useEffect(() => {
-        console.log("<Sign In>");
-        // handle session
+        console.log("<SignIn>");
     }, []);
     return (
         <div className={`container `}>

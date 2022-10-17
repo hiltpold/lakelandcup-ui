@@ -1,9 +1,16 @@
 
 import { FunctionalComponent, h } from 'preact';
 import { Route, Router } from 'preact-router';
-import { withAuthenticationRequired } from "@auth0/auth0-react";
 import Loading from "../components/loading";
 
+import { createContext } from "preact";
+
+const authContext = createContext({
+  authenticated: false,
+  setAuthenticated: (auth: boolean) => {}
+});
+
+/*
 const ProtectedRoute: FunctionalComponent = ({children, ...args }) => (
   <Route
     component={withAuthenticationRequired(children, {
@@ -12,4 +19,8 @@ const ProtectedRoute: FunctionalComponent = ({children, ...args }) => (
     {...args}
   />
 );
-export default ProtectedRoute;
+
+export {authContext, ProtectedRoute}
+*/
+
+export default authContext;
