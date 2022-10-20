@@ -1,5 +1,7 @@
+import { request } from "https";
 import preact, { FunctionalComponent, h, JSX } from "preact";
 import {useState, useEffect, useReducer} from "preact/hooks";
+import Redirect from "../../components/redirect";
 import style from "./style.module.css";
 
 type State = {
@@ -25,6 +27,7 @@ function isValidEmail(email: string) {
 
 const SignUp: FunctionalComponent = () => {
     const [passwordEquality, setPasswordEquality] = useState<boolean>(false);
+    const [redirect, setRedirect] = useState<boolean>(false);
     const [formData, setFormData] = useReducer(formReducer, {firstName:"", lastName:"", email:"",password:"", passwordConfirmation:""});
     const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -44,15 +47,25 @@ const SignUp: FunctionalComponent = () => {
         const emailIsValid = isValidEmail(formData.email)
         const namesAreValid = (formData.firstName.length > 0 && formData.lastName.length > 0)
 
-        if (passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
-            console.log("hallo")
-            //setSubmitting(true);
-            //setPasswordEquality(match);
-        } else {
-            //setPasswordEquality(match);
+        if(!submitting && passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
+            setSubmitting(true);
+            fetch("http://localhost:50000/v1/auth/user/signup", {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData),
+            }).then(response => {
+                return response.json()
+            }).then(data => {
+                if(data.status == 201){
+                    setRedirect(true)
+                }
+            })
         }
         console.log(formData)
-        console.log(submitting);
         setTimeout(() => {
           setSubmitting(false);
         }, 3000)
@@ -61,6 +74,9 @@ const SignUp: FunctionalComponent = () => {
     useEffect(() => {
         console.log("<SignUp>");
     }, []);
+    if (submitting == true && redirect) {
+        return <Redirect to="/activation" ></Redirect>
+    } else {
 
     return (
         <div className={`container `}>
@@ -115,5 +131,6 @@ const SignUp: FunctionalComponent = () => {
             </div>
         </div>
     );
+    }
 };
 export default SignUp;
