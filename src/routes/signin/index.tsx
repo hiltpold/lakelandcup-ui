@@ -1,30 +1,52 @@
-import { FunctionalComponent, h } from "preact";
-import {useState, useEffect} from "preact/hooks";
+import { FunctionalComponent, h, JSX} from "preact";
+import {useState, useEffect, useReducer} from "preact/hooks";
 import style from "./style.module.css";
 import authContext from '../../contexts';
+import postData from "../../utils/requests";
+import formReducer,{ State, Action} from "../../utils/reducer";
 
 interface Props {
     authHandler?: string;
 }
 
+interface  SigninState extends State {
+    email: string;
+    password: string;
+};
+
+interface SigninAction extends Action{};
+
+function isValidEmail(email: string) {
+    return /\S+@\S+\.\S+/.test(email);
+}
+
 const SignIn: FunctionalComponent<Props> = (props: Props) => {
     const [isAuthenticated, setIsAuthenticated] = useState(authContext);
-
+    const [formData, setFormData] = useReducer(formReducer<SigninState, SigninAction>, {email:"",password:""});
     const [user, setUser] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+
+    const handleChange = ({currentTarget}: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+        setFormData({
+            type: "SET_FORM",
+            payload: {name: currentTarget.name, value: currentTarget.value}
+        });
+    }
+
     useEffect(() => {
         console.log("<SignIn>");
     }, []);
+
     return (
         <div className={`container `}>
             <div className="columns">
                 <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.signin}`}>
                     <div className="form-group">
                         <label className="form-label"> 
-                            <input className="form-input lakelandcup-input-form" type="text" placeholder="username" onChange={()=>{}} />
+                            <input className="form-input lakelandcup-input-form" type="text" name="email" placeholder="email" onChange={handleChange} />
                         </label>
                         <label className="form-label"> 
-                            <input className="form-input lakelandcup-input-form" type="password" placeholder="password" onChange={()=>{}} />
+                            <input className="form-input lakelandcup-input-form" type="password" name="password" placeholder="password" onChange={handleChange} />
                         </label>
                         <label className="form-label"> 
                             <button className="btn" onClick={()=>{}} >
