@@ -11,6 +11,8 @@ import SignIn from "../routes/signin";
 import SignUp from "../routes/signup";
 import authContext from '../contexts';
 import Activation from '../routes/activation';
+import ProtectedRoute from './protect';
+
 const App: FunctionalComponent = () => {
     const [authenticated, setAuthenticated] = useState(false);
 
@@ -21,7 +23,7 @@ const App: FunctionalComponent = () => {
             <Navbar/>
             <Router>
                 <Home path="/" />
-                <League path="/league" />
+                <League path="/leage" />
                 <SignIn path="/signin" />
                 <SignUp path="/signup" />
                 <Activation path="/activation" />

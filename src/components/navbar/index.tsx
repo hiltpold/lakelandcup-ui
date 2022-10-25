@@ -7,6 +7,7 @@ const Navbar: FunctionalComponent= () => {
         <header className={`navbar ${style.navbar}`}>
             <section className="navbar-section" />
             <section className="navbar-center">
+                <a className="btn btn-link text-dark" href="/prospects"> League </a>
                 <a className="btn btn-link text-dark" href="/league"> League </a>
                 <a className="btn btn-link text-dark" href="/signin"> Sign In </a>
             </section>

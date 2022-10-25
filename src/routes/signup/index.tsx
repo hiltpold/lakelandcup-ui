@@ -45,7 +45,7 @@ const SignUp: FunctionalComponent = () => {
 
         if(!submitting && passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
             setSubmitting(true);
-            postData("http://localhost:50000/v1/auth/user/signup", {body: JSON.stringify(formData)}).then(data => {
+            postData("http://localhost:50000/v1/auth/user/signup", formData).then(data => {
                 if(data.status == 201){
                     setRedirect(true)
                 }
@@ -117,6 +117,6 @@ const SignUp: FunctionalComponent = () => {
                 </div>
             </div>
         );
-        }
+    }
 };
 export default SignUp;
