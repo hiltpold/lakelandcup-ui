@@ -1,15 +1,22 @@
 .hero{
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 0.4rem;
-    padding-right: 0.4rem;
-    padding-bottom: 1rem;
-    padding-top: 1rem;
-    width: 100%;
-} 
-  
+    display: flex;
+    justify-content: center;
+}
+
+.imgcontainer{
+    width: 250px;
+    height: 250px;
+    margin-top:1rem;
+    margin-bottom:1rem;
+}
+
+.link {
+    outline:none;
+    box-shadow:none;
+}
+
 .img{
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: 100%;
+    width: 250;
+    height: 250;
 } 

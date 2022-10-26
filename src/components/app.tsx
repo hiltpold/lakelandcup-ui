@@ -23,7 +23,8 @@ const App: FunctionalComponent = () => {
             <Navbar/>
             <Router>
                 <Home path="/" />
-                <League path="/leage" />
+                <League path="/league" />
+                <Prospects path="/prospects" />
                 <SignIn path="/signin" />
                 <SignUp path="/signup" />
                 <Activation path="/activation" />

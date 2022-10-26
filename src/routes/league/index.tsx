@@ -1,15 +1,18 @@
 import { FunctionalComponent, h } from 'preact';
 import { useContext } from 'preact/hooks';
-import Loading from "../../components/loading";
 import authContext from '../../contexts';
+import style from "./style.module.css";
 
 const League: FunctionalComponent = () =>   {
     const {authenticated, setAuthenticated} = useContext(authContext);
 
     return (
-        <div>
+        <div className={`${style.league} container grid-md`}>
             <h1>
-                {`Authentication is ${authenticated}`}
+                {`League`}
+            </h1>
+            <h1>
+                {`Authentication: ${authenticated}`}
             </h1>
         </div>
     );
