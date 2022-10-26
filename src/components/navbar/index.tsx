@@ -5,10 +5,30 @@ import AuthenticationButton from "../authbuttons";
 const Navbar: FunctionalComponent= () => {
     return(
         <header className={`navbar ${style.navbar}`}>
-            <section className="navbar-section" />
+            <section className="navbar-section" >
+            </section>
             <section className="navbar-center">
                 <a className="btn btn-link text-dark" href="/prospects"> Prospects </a>
-                <a className="btn btn-link text-dark" href="/league"> League </a>
+                <div class="accordion">
+                    <input type="checkbox" id="accordion-1" name="accordion-checkbox" hidden />
+                    <label class="accordion-header" style="display:inline" for="accordion-1">
+                        <i class="icon icon-arrow-right mr-1" />
+                        Fantasy
+                    </label>
+                    <div class="accordion-body" style="position:absolute" >
+                    <ul class="menu menu-nav text-tiny" style="padding:0;transform:translateY(0)">
+                    <div style="display:flex">
+                    <li class="menu-item" style="margin:0">
+                        <a href="/league">League</a>
+                    </li>
+                    <li class="menu-item" style="margin:0">
+                        <a href="/franchise">Franchise</a>
+                    </li>
+                    </div>
+                    </ul>  
+
+                    </div>
+                </div>
             </section>
             <section className="navbar-section" >
                 <a className="btn btn-link text-dark" href="/signin"> Sign In </a>

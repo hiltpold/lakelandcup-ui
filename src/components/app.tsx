@@ -19,17 +19,17 @@ const App: FunctionalComponent = () => {
     return (
         <div id="app">
             <authContext.Provider value={{ authenticated, setAuthenticated }}>
-            <Hero/>
-            <Navbar/>
-            <Router>
-                <Home path="/" />
-                <League path="/league" />
-                <Prospects path="/prospects" />
-                <SignIn path="/signin" />
-                <SignUp path="/signup" />
-                <Activation path="/activation" />
-                <NotFound default />
-            </Router>
+                <Hero/>
+                <Navbar/>
+                <Router>
+                    <Home path="/" />
+                    <League path="/league" />
+                    <Prospects path="/prospects" />
+                    <SignIn path="/signin" />
+                    <SignUp path="/signup" />
+                    <Activation path="/activation" />
+                    <NotFound default />
+                </Router>
             </authContext.Provider>
 
         </div>
