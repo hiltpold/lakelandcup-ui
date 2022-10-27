@@ -1,10 +1,10 @@
 import { FunctionalComponent, h } from 'preact';
 import { useContext } from 'preact/hooks';
-import { AuthContext } from '../../contexts/auth';
+import authContext from '../../contexts/auth';
 import style from "./style.module.css";
 
 const Prospects: FunctionalComponent = () =>   {
-    const {authenticated, setAuthenticated} = useContext(AuthContext);
+    const {authenticated, setAuthenticated} = useContext(authContext);
 
     return (
         <div className={`${style.prospects} container grid-md`}>

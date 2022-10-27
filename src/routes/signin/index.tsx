@@ -1,7 +1,7 @@
 import { FunctionalComponent, h, JSX} from "preact";
 import {useState, useEffect, useReducer, useContext} from "preact/hooks";
 import style from "./style.module.css";
-import authContext from '../../contexts';
+import { AuthContext } from '../../contexts/auth';
 import postData from "../../utils/requests";
 import formReducer,{ State, Action} from "../../utils/reducer";
 import Redirect from "../../components/redirect";
@@ -22,7 +22,7 @@ function isValidEmail(email: string) {
 }
 
 const SignIn: FunctionalComponent<Props> = (props: Props) => {
-    const {authenticated, setAuthenticated} = useContext(authContext);
+    const {authenticated, setAuthenticated} = useContext(AuthContext);
     //const authHandler = useContext(authContext);
     const [redirect, setRedirect] = useState<boolean>(false);
     const [formData, setFormData] = useReducer(formReducer<SigninState, SigninAction>, {email:"",password:""});
