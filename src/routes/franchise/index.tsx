@@ -17,7 +17,9 @@ const Franchise: FunctionalComponent = () =>   {
                 {`Authentication: ${authenticated}`}
             </h1>
             <h1>
-                {`Fantasy State: ${JSON.stringify(franchiseState)}`}
+                <pre>
+                    {`Fantasy State: ${JSON.stringify(franchiseState, null, 2)}`}
+                </pre>
             </h1>
         </div>
     );

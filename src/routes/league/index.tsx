@@ -17,7 +17,9 @@ const League: FunctionalComponent = () =>   {
                 {`Authentication: ${authenticated}`}
             </h1>
             <h1>
-                {`Fantasy State: ${JSON.stringify(leagueState)}`}
+                <pre>
+                    {`League State: ${JSON.stringify(leagueState, null, 2)}`}
+                </pre>
             </h1>
         </div>
     );

@@ -1,39 +1,35 @@
-import { FunctionalComponent, h, JSX} from "preact";
-import {useState, useEffect, useReducer, useContext} from "preact/hooks";
+import { FunctionalComponent, h, JSX } from "preact";
+import { useState, useEffect, useReducer, useContext } from "preact/hooks";
 import style from "./style.module.css";
-import { AuthContext } from '../../contexts/auth';
+import { AuthContext } from "../../contexts/auth";
 import postData from "../../utils/requests";
-import formReducer,{ State, Action} from "../../utils/reducer";
+import formReducer, { FormEnum, SigninType } from "../../utils/reducers";
 import Redirect from "../../components/redirect";
 
 interface Props {
     authHandler?: string;
 }
 
-interface  SigninState extends State {
-    email: string;
-    password: string;
-};
-
-interface SigninAction extends Action{};
-
 function isValidEmail(email: string) {
     return /\S+@\S+\.\S+/.test(email);
 }
 
 const SignIn: FunctionalComponent<Props> = (props: Props) => {
-    const {authenticated, setAuthenticated} = useContext(AuthContext);
+    const { authenticated, setAuthenticated } = useContext(AuthContext);
     //const authHandler = useContext(authContext);
     const [redirect, setRedirect] = useState<boolean>(false);
-    const [formData, setFormData] = useReducer(formReducer<SigninState, SigninAction>, {email:"",password:""});
+    const [formData, setFormData] = useReducer(formReducer<SigninType>, {
+        email: "",
+        password: "",
+    });
     const [submitting, setSubmitting] = useState<boolean>(false);
 
-    const handleChange = ({currentTarget}: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+    const handleChange = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
         setFormData({
-            type: "SET_FORM",
-            payload: {name: currentTarget.name, value: currentTarget.value}
+            type: FormEnum.Set,
+            payload: { name: currentTarget.name, value: currentTarget.value },
         });
-    }
+    };
 
     useEffect(() => {
         console.log("<SignIn>");
@@ -42,28 +38,28 @@ const SignIn: FunctionalComponent<Props> = (props: Props) => {
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
 
-        const emailIsValid = isValidEmail(formData.email)
-        const passwordhasLength = formData.password.length >= 8
+        const emailIsValid = isValidEmail(formData.email);
+        const passwordhasLength = formData.password.length >= 8;
 
-        if(!submitting && passwordhasLength && emailIsValid) {
+        if (!submitting && passwordhasLength && emailIsValid) {
             setSubmitting(true);
-            postData("http://localhost:50000/v1/auth/user/signin", formData).then(data => {
-                if(data.status == 200){
+            postData("http://localhost:50000/v1/auth/user/signin", formData).then((data) => {
+                if (data.status == 200) {
                     setRedirect(true);
                     setAuthenticated(true);
                 } else {
                     // TODO: handle error api response
-                    console.log(`API response code ${data.status}`)
+                    console.log(`API response code ${data.status}`);
                 }
-            })
+            });
         }
 
         setTimeout(() => {
-          setSubmitting(false);
-        }, 3000)
-    }
+            setSubmitting(false);
+        }, 3000);
+    };
     if (submitting == true && redirect == true) {
-        return <Redirect to="/" ></Redirect>
+        return <Redirect to="/"></Redirect>;
     } else {
         return (
             <div className={`container `}>
@@ -71,14 +67,26 @@ const SignIn: FunctionalComponent<Props> = (props: Props) => {
                     <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.signin}`}>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
-                                <label className="form-label"> 
-                                    <input className="form-input lakelandcup-input-form" type="text" name="email" placeholder="email" onChange={handleChange} />
+                                <label className="form-label">
+                                    <input
+                                        className="form-input lakelandcup-input-form"
+                                        type="text"
+                                        name="email"
+                                        placeholder="email"
+                                        onChange={handleChange}
+                                    />
                                 </label>
-                                <label className="form-label"> 
-                                    <input className="form-input lakelandcup-input-form" type="password" name="password" placeholder="password" onChange={handleChange} />
+                                <label className="form-label">
+                                    <input
+                                        className="form-input lakelandcup-input-form"
+                                        type="password"
+                                        name="password"
+                                        placeholder="password"
+                                        onChange={handleChange}
+                                    />
                                 </label>
-                                <label className="form-label"> 
-                                    <button className="btn" onClick={()=>{}} >
+                                <label className="form-label">
+                                    <button className="btn" onClick={() => {}}>
                                         Sign In
                                     </button>
                                 </label>
@@ -86,7 +94,10 @@ const SignIn: FunctionalComponent<Props> = (props: Props) => {
                                     <b> Don't have an account yet? </b>
                                 </div>
                                 <div>
-                                    <b> Please register <a href="/signup">here</a>.</b>
+                                    <b>
+                                        {" "}
+                                        Please register <a href="/signup">here</a>.
+                                    </b>
                                 </div>
                             </div>
                         </form>
