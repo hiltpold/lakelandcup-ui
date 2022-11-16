@@ -6,22 +6,19 @@ import postData from "../../utils/requests";
 import formReducer, { FormEnum, SigninType } from "../../utils/reducers";
 import Redirect from "../../components/redirect";
 
-interface Props {
-    authHandler?: string;
-}
-
 function isValidEmail(email: string) {
     return /\S+@\S+\.\S+/.test(email);
 }
 
-const SignIn: FunctionalComponent<Props> = (props: Props) => {
+const initialSignInState = {
+    email: "",
+    password: "",
+};
+
+const SignIn: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
-    //const authHandler = useContext(authContext);
     const [redirect, setRedirect] = useState<boolean>(false);
-    const [formData, setFormData] = useReducer(formReducer<SigninType>, {
-        email: "",
-        password: "",
-    });
+    const [formData, setFormData] = useReducer(formReducer<SigninType>, initialSignInState);
     const [submitting, setSubmitting] = useState<boolean>(false);
 
     const handleChange = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
@@ -58,7 +55,7 @@ const SignIn: FunctionalComponent<Props> = (props: Props) => {
             setSubmitting(false);
         }, 3000);
     };
-    if (submitting == true && redirect == true) {
+    if (submitting == true && authenticated == true && redirect == true) {
         return <Redirect to="/"></Redirect>;
     } else {
         return (

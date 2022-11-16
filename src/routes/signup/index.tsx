@@ -5,22 +5,24 @@ import Redirect from "../../components/redirect";
 import style from "./style.module.css";
 import postData from "../../utils/requests";
 
-import formReducer, { FormEnum, SigninType, SignupType } from "../../utils/reducers";
+import formReducer, { FormEnum, SignupType } from "../../utils/reducers";
 
 function isValidEmail(email: string) {
     return /\S+@\S+\.\S+/.test(email);
 }
 
+const initialSignUpState = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    passwordConfirmation: "",
+};
+
 const SignUp: FunctionalComponent = () => {
     const [passwordEquality, setPasswordEquality] = useState<boolean>(false);
     const [redirect, setRedirect] = useState<boolean>(false);
-    const [formData, setFormData] = useReducer(formReducer<SignupType>, {
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        passwordConfirmation: "",
-    } as SignupType);
+    const [formData, setFormData] = useReducer(formReducer<SignupType>, initialSignUpState);
     const [submitting, setSubmitting] = useState<boolean>(false);
 
     const handleChange = ({ currentTarget }: JSX.TargetedEvent<HTMLInputElement, Event>) => {

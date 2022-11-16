@@ -5,6 +5,7 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ESLintPlugin from "eslint-webpack-plugin";
 import {} from 'webpack-dev-server';
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import dotenv from "dotenv";
 
 dotenv.config( {
@@ -13,6 +14,7 @@ dotenv.config( {
 
 const config: Configuration = {
   mode: "production",
+  devtool: false,
   output: {
     publicPath: "/",
   },
@@ -71,7 +73,7 @@ const config: Configuration = {
     splitChunks: {
       chunks: 'all',
     },
-  },
-  devtool: false,
+    minimize: true
+},
 };
 export default config;

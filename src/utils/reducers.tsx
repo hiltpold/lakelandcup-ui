@@ -1,5 +1,6 @@
 export enum FormEnum {
     Set = "SET_FORM",
+    Delete = "DELETE_FORM_ENTRY",
 }
 
 type ActionMap<M extends { [index: string]: any }> = {
