@@ -1,11 +1,21 @@
-name: Build and publish manually
+#
+# Publish lakelandcup-ui docker image to digitalocean registry. The following secret must be provided through github
+#   - DIGITALOCEAN_ACCESS_TOKEN (digitalocean access token)
+#
+
+name: Publish lakelandcup-ui image
+
+env:
+  PROJECT: lakelandcup
+  REGISTRY: registry.digitalocean.com/hiltpold
 
 on:
   workflow_dispatch:
     inputs:
       version:
         description: 'Image version'
-        required: true
+        required: false
+        default: "latest"
 
 jobs:
   build_and_push:
@@ -14,7 +24,7 @@ jobs:
       - name: Checkout the repo 
         uses: actions/checkout@v3
       - name: Build image 
-        run: docker build -t lakelandcup/${{ github.event.repository.name }} .
+        run: docker build -t ${{ env.PROJECT }}/${{ github.event.repository.name }} .
       - name: Install doctl 
         uses: digitalocean/action-doctl@v2
         with:
@@ -22,8 +32,12 @@ jobs:
       - name: Log in to DO Container Registry 
         run: doctl registry login --expiry-seconds 600
       - name: Tag image 
-        run:
-          docker tag lakelandcup/${{ github.event.repository.name }} \
-          registry.digitalocean.com/hiltpoldtech/lakelandcup/${{ github.event.repository.name }}:${{github.event.inputs.version }}
-      - name: Push image to DO Container Registry 
-        run: docker push registry.digitalocean.com/hiltpoldtech/lakelandcup/${{ github.event.repository.name }}:${{github.event.inputs.version }}
+        run: >
+          docker tag ${{ env.PROJECT }}/${{ github.event.repository.name }}
+          ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ github.event.repository.name }}:${{ github.event.inputs.version }}
+      - name: Push image to Registry 
+        run: >
+          docker push
+          ${{ env.REGISTRY }}/${{ env.PROJECT }}/${{ github.event.repository.name }}:${{ github.event.inputs.version }}
+        
+        
