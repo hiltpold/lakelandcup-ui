@@ -9,11 +9,21 @@ export interface IFantasy {
     leagueIds: string[];
 }
 
+export const initialLeague = {
+    id: "",
+    name: "",
+    foundationYear: "",
+    maxFranchises: "",
+    commissioner: "",
+    deputyCommissioner: "",
+};
+
 export interface ILeague {
     id: string;
     name: string;
-    creator: string;
+    foundationYear: string;
     commissioner: string;
+    deputyCommissioner: string;
 }
 
 export interface IFranchise {
@@ -38,27 +48,15 @@ export const FranchiseContext = createContext({} as IFranchiseContext);
 //export leagueReducer = (state, action)
 
 const Fantasy: FunctionalComponent = ({ children }) => {
-    const initialLeague = {
-        id: "",
-        name: "",
-        creator: "",
-        commissioner: "",
-    };
-    const initialFranchise = {
-        id: "",
-        name: "",
-        owner: "",
-        league: initialLeague,
-    };
-
     const [leagueState, setLeagueState] = useState<ILeague>(initialLeague);
-    const [franchiseState, setFranchiseState] = useState<IFranchise>(initialFranchise);
-
+    /*
+    <FranchiseContext.Provider value={{ franchiseState, setFranchiseState }}>
+        {children}
+    </FranchiseContext.Provider>
+    */
     return (
         <LeagueContext.Provider value={{ leagueState, setLeagueState }}>
-            <FranchiseContext.Provider value={{ franchiseState, setFranchiseState }}>
-                {children}
-            </FranchiseContext.Provider>
+            {children}
         </LeagueContext.Provider>
     );
 };

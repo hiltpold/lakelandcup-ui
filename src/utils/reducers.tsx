@@ -14,6 +14,14 @@ type ActionMap<M extends { [index: string]: any }> = {
           };
 };
 
+export type LeagueType = {
+    name: string;
+    foundationYear: string;
+    maxFranchises: bigint | null;
+    admin: string;
+    commissioner: string;
+};
+
 export type SignupType = {
     firstName: string;
     lastName: string;

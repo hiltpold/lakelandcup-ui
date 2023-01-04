@@ -62,7 +62,7 @@ const SignUp: FunctionalComponent = () => {
         return <Redirect to="/activation"></Redirect>;
     } else {
         return (
-            <div className={`container `}>
+            <div className={`container`}>
                 <div className="columns">
                     <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.signup}`}>
                         <form onSubmit={handleSubmit}>
