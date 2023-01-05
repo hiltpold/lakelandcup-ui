@@ -1,12 +1,12 @@
 export async function get(url = "") {
     const response = await fetch(url, {
         method: "GET",
-        //mode: 'cors',
+        mode: "cors",
         headers: {
             Accept: "application/json",
         },
+        credentials: "include",
     });
-    // parses JSON response into native JavaScript objects
     return response.json();
 }
 

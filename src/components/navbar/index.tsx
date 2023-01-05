@@ -1,12 +1,25 @@
-import { FunctionalComponent, h } from "preact";
+import { FunctionalComponent, h, JSX } from "preact";
 import style from "./style.module.css";
 import AuthenticationButton from "../authbuttons";
 import { useContext } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
+import post, { get } from "../../utils/requests";
 
 const Navbar: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
 
+    // TODO: correct type
+    const handleSignout = ({ currentTarget }: any) => {
+        // sign out
+        get(`${process.env.BASE_URL_AUTH_SVC}/user/signout`).then((data) => {
+            if (data.status == 200) {
+                setAuthenticated(false);
+            } else {
+                // TODO: handle error api response
+                console.log(`API response code ${data.status}`);
+            }
+        });
+    };
     return (
         <header className={`navbar ${style.navbar}`}>
             <section className="navbar-section"></section>
@@ -23,7 +36,11 @@ const Navbar: FunctionalComponent = () => {
             </section>
             <section className="navbar-section">
                 {authenticated ? (
-                    <a className="btn btn-link text-dark text-small" href="/signout">
+                    <a
+                        className="btn btn-link text-dark text-small"
+                        href="/"
+                        onClick={handleSignout}
+                    >
                         Sign Out
                     </a>
                 ) : (

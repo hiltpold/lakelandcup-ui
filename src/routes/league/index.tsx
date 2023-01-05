@@ -1,9 +1,10 @@
 import { FunctionalComponent, h, JSX } from "preact";
-import { useContext, useEffect, useState, useReducer } from "preact/hooks";
+import { useContext, useEffect, useState, useReducer, useImperativeHandle } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
 import { LeagueContext } from "../../contexts/fantasy";
+import post, { get } from "../../utils/requests";
 import style from "./style.module.css";
-
+import { User } from "../../components/app";
 import formReducer, { FormEnum, LeagueType } from "../../utils/reducers";
 
 export const initialLeague = {
@@ -16,10 +17,10 @@ export const initialLeague = {
     adminID: "",
     commissionerID: "",
 };
-
 const League: FunctionalComponent = () => {
     const [formData, setFormData] = useReducer(formReducer<LeagueType>, initialLeague);
     const [leagueExists, setLeagueExists] = useState<boolean>(false);
+    const [users, setUsers] = useState<Array<User>>();
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     //const [submitting, setSubmitting] = useState<boolean>(false);
     //const { leagueState, setLeagueState } = useContext(LeagueContext);
@@ -27,8 +28,6 @@ const League: FunctionalComponent = () => {
     const handleChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
-        console.log(currentTarget.name);
-        console.log(currentTarget.value);
         setFormData({
             type: FormEnum.Set,
             payload: { name: currentTarget.name, value: currentTarget.value },
@@ -44,11 +43,19 @@ const League: FunctionalComponent = () => {
         // check if league was already created
 
         // get signed up users
+        get(`${process.env.BASE_URL_AUTH_SVC}/user`).then((data) => {
+            if (data.status == 200) {
+                console.log(data);
+            } else {
+                // TODO: handle error api response
+                console.log(`API response code ${data.status}`);
+            }
+        });
 
         // set creator of league as admin
         setFormData({
             type: FormEnum.Set,
-            payload: { name: "commissioner", value: "" },
+            payload: { name: "admin", value: "" },
         });
 
         console.log("<League>");
