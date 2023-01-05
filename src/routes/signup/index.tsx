@@ -3,7 +3,7 @@ import preact, { FunctionalComponent, h, JSX } from "preact";
 import { useState, useEffect, useReducer } from "preact/hooks";
 import Redirect from "../../components/redirect";
 import style from "./style.module.css";
-import postData from "../../utils/requests";
+import post from "../../utils/requests";
 
 import formReducer, { FormEnum, SignupType } from "../../utils/reducers";
 
@@ -42,7 +42,7 @@ const SignUp: FunctionalComponent = () => {
 
         if (!submitting && passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
             setSubmitting(true);
-            postData("http://localhost:50000/v1/auth/user/signup", formData).then((data) => {
+            post(`${process.env.BASE_URL_AUTH_SVC}/user/signup`, formData).then((data) => {
                 if (data.status == 201) {
                     setRedirect(true);
                 }

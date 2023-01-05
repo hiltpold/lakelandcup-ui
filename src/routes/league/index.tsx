@@ -10,8 +10,11 @@ export const initialLeague = {
     name: "",
     foundationYear: "",
     maxFranchises: null,
-    admin: "",
-    commissioner: "",
+    maxProspects: null,
+    maxYearsSkater: null,
+    maxYearsGoalie: null,
+    adminID: "",
+    commissionerID: "",
 };
 
 const League: FunctionalComponent = () => {
@@ -49,6 +52,7 @@ const League: FunctionalComponent = () => {
         });
 
         console.log("<League>");
+        console.log(process.env.BASE_URL_FANTASY_SVC);
     }, []);
 
     if (leagueExists) {

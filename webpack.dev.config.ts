@@ -7,10 +7,10 @@ import {} from 'webpack-dev-server';
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import dotenv from "dotenv";
 
-dotenv.config( {
+dotenv.config({
     path: path.join(__dirname, '.dev.env')
  });
-
+ 
 const config: Configuration = {
   mode: "development",
   output: {
@@ -64,7 +64,7 @@ const config: Configuration = {
         extensions: ['ts']
       }),
     new DefinePlugin({ 
-        "process.env.BASE_URL_AUTH_SERVICE": JSON.stringify(process.env.BASE_URL_AUTH_SERVICE),
+        "process.env": JSON.stringify(process.env),
     })
 
   ],

@@ -1,23 +1,40 @@
 import { FunctionalComponent, h } from "preact";
 import style from "./style.module.css";
 import AuthenticationButton from "../authbuttons";
+import { useContext } from "preact/hooks";
+import { AuthContext } from "../../contexts/auth";
 
-const Navbar: FunctionalComponent= () => {
-    return(
+const Navbar: FunctionalComponent = () => {
+    const { authenticated, setAuthenticated } = useContext(AuthContext);
+
+    return (
         <header className={`navbar ${style.navbar}`}>
-            <section className="navbar-section" >
-            </section>
+            <section className="navbar-section"></section>
             <section className="navbar-center">
-                <a className="btn btn-link text-dark text-small" href="/league"> League </a>
-                <a className="btn btn-link text-dark text-small" href="/franchise"> Franchise </a>
-                <a className="btn btn-link text-dark text-small" href="/prospects"> Prospects </a>
+                <a className="btn btn-link text-dark text-small" href="/league">
+                    League
+                </a>
+                <a className="btn btn-link text-dark text-small" href="/franchise">
+                    Franchise
+                </a>
+                <a className="btn btn-link text-dark text-small" href="/prospects">
+                    Prospects
+                </a>
             </section>
-            <section className="navbar-section" >
-                <a className="btn btn-link text-dark text-small" href="/signin"> Sign In </a>
+            <section className="navbar-section">
+                {authenticated ? (
+                    <a className="btn btn-link text-dark text-small" href="/signout">
+                        Sign Out
+                    </a>
+                ) : (
+                    <a className="btn btn-link text-dark text-small" href="/signin">
+                        Sign In
+                    </a>
+                )}
             </section>
         </header>
     );
-}; 
+};
 export default Navbar;
 /*
 <header className={`navbar ${style.navbar}`}>

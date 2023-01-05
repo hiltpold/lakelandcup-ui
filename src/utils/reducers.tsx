@@ -18,8 +18,17 @@ export type LeagueType = {
     name: string;
     foundationYear: string;
     maxFranchises: bigint | null;
-    admin: string;
-    commissioner: string;
+    maxProspects: bigint | null;
+    maxYearsSkater: bigint | null;
+    maxYearsGoalie: bigint | null;
+    adminID: string;
+    commissionerID: string;
+};
+
+export type FranchiseType = {
+    name: string;
+    foundationYear: string;
+    leagueID: string;
 };
 
 export type SignupType = {

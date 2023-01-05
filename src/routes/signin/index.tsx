@@ -2,7 +2,7 @@ import { FunctionalComponent, h, JSX } from "preact";
 import { useState, useEffect, useReducer, useContext } from "preact/hooks";
 import style from "./style.module.css";
 import { AuthContext } from "../../contexts/auth";
-import postData from "../../utils/requests";
+import post, { get } from "../../utils/requests";
 import formReducer, { FormEnum, SigninType } from "../../utils/reducers";
 import Redirect from "../../components/redirect";
 
@@ -40,10 +40,11 @@ const SignIn: FunctionalComponent = () => {
 
         if (!submitting && passwordhasLength && emailIsValid) {
             setSubmitting(true);
-            postData("http://localhost:50000/v1/auth/user/signin", formData).then((data) => {
+            post(`${process.env.BASE_URL_AUTH_SVC}/user/signin`, formData).then((data) => {
                 if (data.status == 200) {
                     setRedirect(true);
                     setAuthenticated(true);
+                    console.log(data);
                 } else {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
