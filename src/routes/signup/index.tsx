@@ -42,7 +42,7 @@ const SignUp: FunctionalComponent = () => {
 
         if (!submitting && passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
             setSubmitting(true);
-            post(`${process.env.BASE_URL_AUTH_SVC}/user/signup`, formData).then((data) => {
+            post(`${process.env.BASE_URL_AUTH_SVC}/signup`, formData).then((data) => {
                 if (data.status == 201) {
                     setRedirect(true);
                 }

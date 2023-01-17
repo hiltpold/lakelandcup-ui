@@ -40,23 +40,22 @@ const SignIn: FunctionalComponent = () => {
 
         if (!submitting && passwordhasLength && emailIsValid) {
             setSubmitting(true);
-            post(`${process.env.BASE_URL_AUTH_SVC}/user/signin`, formData).then((data) => {
+            post(`${process.env.BASE_URL_AUTH_SVC}/signin`, formData).then((data) => {
                 if (data.status == 200) {
                     setRedirect(true);
-                    setAuthenticated(true);
                     console.log(data);
+                    setAuthenticated({ id: data.userId, state: true });
                 } else {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
                 }
             });
         }
-
         setTimeout(() => {
             setSubmitting(false);
         }, 3000);
     };
-    if (submitting == true && authenticated == true && redirect == true) {
+    if (submitting == true && authenticated.state == true && redirect == true) {
         return <Redirect to="/"></Redirect>;
     } else {
         return (

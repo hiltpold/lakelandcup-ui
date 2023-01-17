@@ -11,15 +11,16 @@ const Navbar: FunctionalComponent = () => {
     // TODO: correct type
     const handleSignout = ({ currentTarget }: any) => {
         // sign out
-        get(`${process.env.BASE_URL_AUTH_SVC}/user/signout`).then((data) => {
+        get(`${process.env.BASE_URL_AUTH_SVC}/signout`).then((data) => {
             if (data.status == 200) {
-                setAuthenticated(false);
+                setAuthenticated({ id: "", state: false });
             } else {
                 // TODO: handle error api response
                 console.log(`API response code ${data.status}`);
             }
         });
     };
+
     return (
         <header className={`navbar ${style.navbar}`}>
             <section className="navbar-section"></section>
@@ -35,7 +36,7 @@ const Navbar: FunctionalComponent = () => {
                 </a>
             </section>
             <section className="navbar-section">
-                {authenticated ? (
+                {authenticated.state ? (
                     <a
                         className="btn btn-link text-dark text-small"
                         href="/"
@@ -53,6 +54,7 @@ const Navbar: FunctionalComponent = () => {
     );
 };
 export default Navbar;
+
 /*
 <header className={`navbar ${style.navbar}`}>
     <section className="navbar-section" >

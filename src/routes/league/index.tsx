@@ -9,18 +9,20 @@ import formReducer, { FormEnum, LeagueType } from "../../utils/reducers";
 
 export const initialLeague = {
     name: "",
+    adminID: "",
+    admin: "",
+    commissionerID: "",
+    commissioner: "",
     foundationYear: "",
     maxFranchises: null,
     maxProspects: null,
-    maxYearsSkater: null,
-    maxYearsGoalie: null,
-    adminID: "",
-    commissionerID: "",
+    draftRightsSkater: null,
+    draftRightsGoalie: null,
 };
-const League: FunctionalComponent = () => {
+const League: FunctionalComponent<{ users: User[] }> = ({ users }) => {
     const [formData, setFormData] = useReducer(formReducer<LeagueType>, initialLeague);
     const [leagueExists, setLeagueExists] = useState<boolean>(false);
-    const [users, setUsers] = useState<Array<User>>();
+    const [selectedId, setSelectedId] = useState<string>("");
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     //const [submitting, setSubmitting] = useState<boolean>(false);
     //const { leagueState, setLeagueState } = useContext(LeagueContext);
@@ -28,38 +30,58 @@ const League: FunctionalComponent = () => {
     const handleChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
+        if (currentTarget.name == "commissionerID") {
+            const userName = users.find((u) => u.id === currentTarget.value);
+            setFormData({
+                type: FormEnum.Set,
+                payload: {
+                    name: "commissioner",
+                    value: userName !== undefined ? userName.name : "",
+                },
+            });
+        }
         setFormData({
             type: FormEnum.Set,
-            payload: { name: currentTarget.name, value: currentTarget.value },
+            payload: {
+                name: currentTarget.name,
+                value: currentTarget.value,
+            },
         });
     };
 
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
+        // set signed in user as admin of league as admin
+        const adminUser = users.find((u) => u.id === authenticated.id);
+        if (adminUser === undefined || adminUser.id === undefined) {
+            console.error("Signed In User is not stored in db. Should not happen.");
+        } else {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "admin", value: adminUser.name },
+            });
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "adminID", value: adminUser.id },
+            });
+        }
+
+        console.log(adminUser);
+        console.log(authenticated);
         console.log(formData);
-    };
 
-    useEffect(() => {
-        // check if league was already created
-
-        // get signed up users
-        get(`${process.env.BASE_URL_AUTH_SVC}/user`).then((data) => {
-            if (data.status == 200) {
-                console.log(data);
+        post(`http://localhost:50000/v1/fantasy/league`, formData).then((data) => {
+            if (data.status == 201) {
+                console.log(`API response code ${data.status}`);
             } else {
                 // TODO: handle error api response
                 console.log(`API response code ${data.status}`);
             }
         });
+    };
 
-        // set creator of league as admin
-        setFormData({
-            type: FormEnum.Set,
-            payload: { name: "admin", value: "" },
-        });
-
+    useEffect(() => {
         console.log("<League>");
-        console.log(process.env.BASE_URL_FANTASY_SVC);
     }, []);
 
     if (leagueExists) {
@@ -98,7 +120,7 @@ const League: FunctionalComponent = () => {
                                 <label className="form-label">
                                     <input
                                         className="form-input lakelandcup-input-form"
-                                        name="leagueName"
+                                        name="name"
                                         type="text"
                                         placeholder="league name"
                                         onChange={handleChange}
@@ -128,14 +150,53 @@ const League: FunctionalComponent = () => {
                                         onChange={handleChange}
                                     />
                                 </label>
+                                <label className={`form-label ${style.label}`}>
+                                    Number of Prospects per Franchise
+                                </label>
+                                <label className="form-label">
+                                    <input
+                                        className="form-input lakelandcup-input-form"
+                                        name="maxProspects"
+                                        type="text"
+                                        placeholder="max prospects"
+                                        onChange={handleChange}
+                                    />
+                                </label>
+                                <label className={`form-label ${style.label}`}>
+                                    Draft Rights for Goalies in Years
+                                </label>
+                                <label className="form-label">
+                                    <input
+                                        className="form-input lakelandcup-input-form"
+                                        name="draftRightsGoalie"
+                                        type="text"
+                                        placeholder="draft rights goalies"
+                                        onChange={handleChange}
+                                    />
+                                </label>
+                                <label className={`form-label ${style.label}`}>
+                                    Draft Rights for Skaters in Years
+                                </label>
+                                <label className="form-label">
+                                    <input
+                                        className="form-input lakelandcup-input-form"
+                                        name="draftRightsSkater"
+                                        type="text"
+                                        placeholder="draft rights skaters"
+                                        onChange={handleChange}
+                                    />
+                                </label>
                                 <label className={`form-label ${style.label}`}>Commissioner</label>
                                 <select
                                     class="form-select"
-                                    name="commissioner"
+                                    name="commissionerID"
                                     type="text"
                                     onChange={handleChange}
                                 >
-                                    <option></option>
+                                    <option>asdfasdf</option>
+                                    {users.map((u) => (
+                                        <option value={u.id}>{u.name}</option>
+                                    ))}
                                 </select>
                                 <label className="form-label">
                                     <button className="btn">Create</button>

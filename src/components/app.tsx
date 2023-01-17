@@ -1,7 +1,7 @@
 import { FunctionalComponent, h } from "preact";
 import { Route, Router } from "preact-router";
 import { useContext, useEffect, useState } from "preact/hooks";
-import { AuthContext } from "../contexts/auth";
+import { AuthContext, AuthType } from "../contexts/auth";
 import post, { get } from "../utils/requests";
 import Hero from "./hero";
 import Navbar from "./navbar";
@@ -23,29 +23,40 @@ export type User = {
 };
 
 const App: FunctionalComponent = () => {
-    const [initAuth, setInitAuth] = useState<boolean>(true);
+    const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
         console.log("<App>");
-
-        // get user information
-        get(`${process.env.BASE_URL_AUTH_SVC}/user`)
+        // get user information, check if signed in already
+        /*
+        get(`${process.env.BASE_URL_AUTH_SVC}/user/info`)
             .then((data) => {
                 if (data.status == 401) {
                     // TODO: handle error api response
-                    console.log(`No API response code ${data.status}`);
                     console.log(`API response code ${data.status}`);
                 } else {
-                    setInitAuth(true);
-                    console.log(initAuth);
+                    setInitAuth({ id: data.userId, state: true });
                 }
             })
             .catch((err) => console.log(err));
-    });
+            */
+        // get all users
+        get(`${process.env.BASE_URL_AUTH_SVC}/user/all`)
+            .then((data) => {
+                if (data.status == 401) {
+                    // TODO: handle error api response
+                    console.log(`API response code ${data.status}`);
+                } else {
+                    //console.log(data);
+                    setUsers(data.users);
+                }
+            })
+            .catch((err) => console.log(err));
+    }, []);
 
     return (
         <div id="app">
-            <Auth initAuth={initAuth}>
+            <Auth>
                 <Hero />
                 <Navbar />
                 <Fantasy>
@@ -54,7 +65,7 @@ const App: FunctionalComponent = () => {
                         <SignIn path="/signin" />
                         <SignUp path="/signup" />
                         <Activation path="/activation" />
-                        <League path="/league" />
+                        <League path="/league" users={users} />
                         <Franchise path="/franchise" />
                         <Prospects path="/prospects" />
                         <NotFound default />

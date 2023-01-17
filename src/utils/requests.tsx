@@ -14,18 +14,14 @@ async function post(url = "", data = {}) {
     const response = await fetch(url, {
         method: "POST",
         mode: "cors",
-        cache: "no-cache",
+        //cache: "no-cache",
         headers: {
             Accept: "application/json",
-            "Content-Type": "application/json",
         },
         credentials: "include",
-        //redirect: 'follow',
-        //referrerPolicy: 'no-referrer',
         body: JSON.stringify(data),
     });
     // parses JSON response into native JavaScript objects
-    console.log(response.headers);
     return response.json();
 }
 

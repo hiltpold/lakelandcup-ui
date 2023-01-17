@@ -19,10 +19,12 @@ export type LeagueType = {
     foundationYear: string;
     maxFranchises: bigint | null;
     maxProspects: bigint | null;
-    maxYearsSkater: bigint | null;
-    maxYearsGoalie: bigint | null;
+    draftRightsGoalie: bigint | null;
+    draftRightsSkater: bigint | null;
     adminID: string;
+    admin: string;
     commissionerID: string;
+    commissioner: string;
 };
 
 export type FranchiseType = {
