@@ -5,15 +5,13 @@ import { AuthContext, AuthType } from "../contexts/auth";
 import post, { get } from "../utils/requests";
 import Hero from "./hero";
 import Navbar from "./navbar";
-import League from "../routes/league";
-import Prospects from "../routes/prospects";
-import Franchise from "../routes/franchise";
 import Home from "../routes/home";
 import NotFound from "../routes/notfound";
 import SignIn from "../routes/signin";
 import SignUp from "../routes/signup";
 import Auth from "../contexts/auth";
 import Activation from "../routes/activation";
+import AdminBoard from "../routes/adminboard";
 import ProtectedRoute from "./protect";
 import Fantasy from "../contexts/fantasy";
 
@@ -65,9 +63,7 @@ const App: FunctionalComponent = () => {
                         <SignIn path="/signin" />
                         <SignUp path="/signup" />
                         <Activation path="/activation" />
-                        <League path="/league" users={users} />
-                        <Franchise path="/franchise" />
-                        <Prospects path="/prospects" />
+                        <AdminBoard path="/adminboard/:rest*" />
                         <NotFound default />
                     </Router>
                 </Fantasy>

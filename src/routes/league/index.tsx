@@ -66,10 +66,6 @@ const League: FunctionalComponent<{ users: User[] }> = ({ users }) => {
             });
         }
 
-        console.log(adminUser);
-        console.log(authenticated);
-        console.log(formData);
-
         post(`http://localhost:50000/v1/fantasy/league`, formData).then((data) => {
             if (data.status == 201) {
                 console.log(`API response code ${data.status}`);
@@ -193,7 +189,7 @@ const League: FunctionalComponent<{ users: User[] }> = ({ users }) => {
                                     type="text"
                                     onChange={handleChange}
                                 >
-                                    <option>asdfasdf</option>
+                                    <option></option>
                                     {users.map((u) => (
                                         <option value={u.id}>{u.name}</option>
                                     ))}

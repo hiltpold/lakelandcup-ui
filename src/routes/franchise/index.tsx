@@ -4,6 +4,7 @@ import { AuthContext } from "../../contexts/auth";
 import { FranchiseContext } from "../../contexts/fantasy";
 import style from "./style.module.css";
 import formReducer, { FormEnum, FranchiseType } from "../../utils/reducers";
+import { User } from "../../components/app";
 
 const initialFranchise = {
     name: "",
@@ -11,7 +12,7 @@ const initialFranchise = {
     leagueID: "",
 };
 
-const Franchise: FunctionalComponent = () => {
+const Franchise: FunctionalComponent<{ users: User[] }> = ({ users }) => {
     const [formData, setFormData] = useReducer(formReducer<FranchiseType>, initialFranchise);
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     const { franchiseState, setFranchiseState } = useContext(FranchiseContext);
@@ -33,32 +34,22 @@ const Franchise: FunctionalComponent = () => {
     };
 
     useEffect(() => {
-        // check if league was already created
-
-        // get signed up users
-
-        // set creator of league as admin
-        setFormData({
-            type: FormEnum.Set,
-            payload: { name: "commissioner", value: "" },
-        });
-
-        console.log("<League>");
+        console.log("<Franchise>");
     }, []);
 
     return (
         <div className={`container`}>
             <div className="columns">
-                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.league}`}>
+                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.franchise}`}>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label className={`form-label ${style.label}`}>League Name</label>
+                            <label className={`form-label ${style.label}`}>Franchise Name</label>
                             <label className="form-label">
                                 <input
                                     className="form-input lakelandcup-input-form"
-                                    name="leagueName"
+                                    name="franchiseName"
                                     type="text"
-                                    placeholder="league name"
+                                    placeholder="franchise name"
                                     onChange={handleChange}
                                 />
                             </label>
@@ -72,26 +63,17 @@ const Franchise: FunctionalComponent = () => {
                                     onChange={handleChange}
                                 />
                             </label>
-                            <label className={`form-label ${style.label}`}>
-                                Number of Franchises
-                            </label>
-                            <label className="form-label">
-                                <input
-                                    className="form-input lakelandcup-input-form"
-                                    name="maxFranchises"
-                                    type="text"
-                                    placeholder="max franchises"
-                                    onChange={handleChange}
-                                />
-                            </label>
-                            <label className={`form-label ${style.label}`}>Commissioner</label>
+                            <label className={`form-label ${style.label}`}>Franchise Owner</label>
                             <select
                                 class="form-select"
-                                name="commissioner"
+                                name="franchiseOwner"
                                 type="text"
                                 onChange={handleChange}
                             >
                                 <option></option>
+                                {users.map((u) => (
+                                    <option value={u.id}>{u.name}</option>
+                                ))}
                             </select>
                             <label className="form-label">
                                 <button className="btn">Create</button>

@@ -28,11 +28,8 @@ const Navbar: FunctionalComponent = () => {
                 <a className="btn btn-link text-dark text-small" href="/league">
                     League
                 </a>
-                <a className="btn btn-link text-dark text-small" href="/franchise">
-                    Franchise
-                </a>
-                <a className="btn btn-link text-dark text-small" href="/prospects">
-                    Prospects
+                <a className="btn btn-link text-dark text-small" href="/adminboard">
+                    Admin
                 </a>
             </section>
             <section className="navbar-section">
