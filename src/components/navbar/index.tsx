@@ -35,14 +35,14 @@ const Navbar: FunctionalComponent = () => {
             <section className="navbar-section">
                 {authenticated.state ? (
                     <a
-                        className="btn btn-link text-dark text-small"
+                        className="btn btn-link text-dark text-tiny"
                         href="/"
                         onClick={handleSignout}
                     >
                         Sign Out
                     </a>
                 ) : (
-                    <a className="btn btn-link text-dark text-small" href="/signin">
+                    <a className="btn btn-link text-dark text-tiny" href="/signin">
                         Sign In
                     </a>
                 )}

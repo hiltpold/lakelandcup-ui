@@ -27,6 +27,7 @@ const Auth: FunctionalComponent = ({ children }) => {
                 if (data.status == 401) {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
+                    setAuthenticated({ id: "", state: false });
                 } else {
                     setAuthenticated({ id: data.userId, state: true });
                 }

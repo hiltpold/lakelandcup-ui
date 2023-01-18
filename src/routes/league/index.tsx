@@ -4,7 +4,7 @@ import { AuthContext } from "../../contexts/auth";
 import { LeagueContext } from "../../contexts/fantasy";
 import post, { get } from "../../utils/requests";
 import style from "./style.module.css";
-import { User } from "../../components/app";
+import { UserType } from "../../components/app";
 import formReducer, { FormEnum, LeagueType } from "../../utils/reducers";
 
 export const initialLeague = {
@@ -19,7 +19,7 @@ export const initialLeague = {
     draftRightsSkater: null,
     draftRightsGoalie: null,
 };
-const League: FunctionalComponent<{ users: User[] }> = ({ users }) => {
+const League: FunctionalComponent<{ users: UserType[] }> = ({ users }) => {
     const [formData, setFormData] = useReducer(formReducer<LeagueType>, initialLeague);
     const [leagueExists, setLeagueExists] = useState<boolean>(false);
     const [selectedId, setSelectedId] = useState<string>("");

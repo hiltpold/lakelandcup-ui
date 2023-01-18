@@ -14,15 +14,31 @@ import Activation from "../routes/activation";
 import AdminBoard from "../routes/adminboard";
 import ProtectedRoute from "./protect";
 import Fantasy from "../contexts/fantasy";
+import internal from "stream";
 
-export type User = {
+export type UserType = {
     id: string;
     name: string;
 };
+export type FranchiseType = {
+    ID: string;
+};
+export type LeagueType = {
+    ID: string;
+    Name: string;
+    Admin: string;
+    AdminID: string;
+    Commissioner: string;
+    CommissionerID: string;
+    DraftRightsGoalie: number;
+    DraftRightsSkater: number;
+    FoundationYear: string;
+    MaxFranchises: number;
+    MaxProspects: number;
+    Franchises: FranchiseType[];
+};
 
 const App: FunctionalComponent = () => {
-    const [users, setUsers] = useState<User[]>([]);
-
     useEffect(() => {
         console.log("<App>");
         // get user information, check if signed in already
@@ -38,18 +54,6 @@ const App: FunctionalComponent = () => {
             })
             .catch((err) => console.log(err));
             */
-        // get all users
-        get(`${process.env.BASE_URL_AUTH_SVC}/user/all`)
-            .then((data) => {
-                if (data.status == 401) {
-                    // TODO: handle error api response
-                    console.log(`API response code ${data.status}`);
-                } else {
-                    //console.log(data);
-                    setUsers(data.users);
-                }
-            })
-            .catch((err) => console.log(err));
     }, []);
 
     return (

@@ -43,10 +43,10 @@ const SignIn: FunctionalComponent = () => {
             post(`${process.env.BASE_URL_AUTH_SVC}/signin`, formData).then((data) => {
                 if (data.status == 200) {
                     setRedirect(true);
-                    console.log(data);
                     setAuthenticated({ id: data.userId, state: true });
                 } else {
                     // TODO: handle error api response
+                    setAuthenticated({ id: "", state: false });
                     console.log(`API response code ${data.status}`);
                 }
             });

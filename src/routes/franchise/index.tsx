@@ -4,7 +4,7 @@ import { AuthContext } from "../../contexts/auth";
 import { FranchiseContext } from "../../contexts/fantasy";
 import style from "./style.module.css";
 import formReducer, { FormEnum, FranchiseType } from "../../utils/reducers";
-import { User } from "../../components/app";
+import { UserType, LeagueType } from "../../components/app";
 
 const initialFranchise = {
     name: "",
@@ -12,7 +12,10 @@ const initialFranchise = {
     leagueID: "",
 };
 
-const Franchise: FunctionalComponent<{ users: User[] }> = ({ users }) => {
+const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
+    users,
+    league,
+}) => {
     const [formData, setFormData] = useReducer(formReducer<FranchiseType>, initialFranchise);
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     const { franchiseState, setFranchiseState } = useContext(FranchiseContext);
@@ -26,10 +29,17 @@ const Franchise: FunctionalComponent<{ users: User[] }> = ({ users }) => {
             type: FormEnum.Set,
             payload: { name: currentTarget.name, value: currentTarget.value },
         });
+        console.log(formData);
     };
 
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
+        if (league !== undefined) {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "leagueID", value: league.ID },
+            });
+        }
         console.log(formData);
     };
 
@@ -43,6 +53,16 @@ const Franchise: FunctionalComponent<{ users: User[] }> = ({ users }) => {
                 <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.franchise}`}>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
+                            <label className={`form-label ${style.label}`}>League</label>
+                            <label className="form-label">
+                                <input
+                                    className="form-input lakelandcup-input-form"
+                                    type="text"
+                                    value={league?.Name}
+                                    onChange={handleChange}
+                                    readOnly
+                                />
+                            </label>
                             <label className={`form-label ${style.label}`}>Franchise Name</label>
                             <label className="form-label">
                                 <input
@@ -76,7 +96,13 @@ const Franchise: FunctionalComponent<{ users: User[] }> = ({ users }) => {
                                 ))}
                             </select>
                             <label className="form-label">
-                                <button className="btn">Create</button>
+                                {league !== undefined ? (
+                                    <button className="btn">Create</button>
+                                ) : (
+                                    <button className="btn" disabled>
+                                        Create
+                                    </button>
+                                )}
                             </label>
                         </div>
                     </form>
