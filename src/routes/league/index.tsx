@@ -9,9 +9,9 @@ import formReducer, { FormEnum, LeagueTypeForm } from "../../utils/reducers";
 
 export const initialLeague = {
     name: "",
-    adminID: "",
+    adminId: "",
     admin: "",
-    commissionerID: "",
+    commissionerId: "",
     commissioner: "",
     foundationYear: "",
     maxFranchises: null,
@@ -100,24 +100,80 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
 
     const handleUpdate = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
+        console.log(league);
         const filteredUpdates = Object.entries(formData).filter((entry) => {
             const field = entry[0];
             const value = entry[1];
-            return value !== null && value !== undefined && value !== "";
+            //console.log(field, value);
+            return;
         });
 
-        const updates = filteredUpdates.map((entry) => {
-            const field = entry[0];
-            const value = entry[1];
-            return { field: field, value: value } as LeagueUpdateType;
-        });
+        if (league !== undefined) {
+            const updates = Object.entries(formData).map((entry) => {
+                const field = entry[0];
+                const value = entry[1];
+                if (value !== null && value !== undefined && value !== "") {
+                    return { [field]: value };
+                } else {
+                    // TODO find better solution
+                    switch (field) {
+                        case "admin": {
+                            return { [field]: league.Admin };
+                        }
+                        case "adminId": {
+                            return { [field]: league.AdminID };
+                        }
+                        case "commissioner": {
+                            return { [field]: league.Commissioner };
+                        }
+                        case "commissionerId": {
+                            return { [field]: league.CommissionerID };
+                        }
+                        case "name": {
+                            return { [field]: league.Name };
+                        }
+                        case "foundationYear": {
+                            return { [field]: league.FoundationYear };
+                        }
+                        case "maxFranchises": {
+                            return { [field]: league.MaxFranchises };
+                        }
+                        case "maxProspects": {
+                            return { [field]: league.MaxProspects };
+                        }
+                        case "draftRightsGoalie": {
+                            return { [field]: league.DraftRightsGoalie };
+                        }
+                        case "draftRightsSkater": {
+                            return { [field]: league.DraftRightsSkater };
+                        }
+                    }
+                }
+            });
 
-        console.log(updates);
+            // TODO: Make it TS compatible
+            const update = updates.reduce((acc, curr) => {
+                for (let key in curr) acc[key] = curr[key];
+                return acc;
+            }, {} as LeagueTypeForm);
+
+            post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}`, update).then((data) => {
+                if (data.status == 201) {
+                    console.log(data);
+                    console.log(`API response code ${data.status}`);
+                } else {
+                    // TODO: handle error api response
+                    console.log(`API response code ${data.status}`);
+                }
+            });
+            console.log(update);
+        }
     };
 
     useEffect(() => {
         console.log("<League>");
     }, []);
+
     return (
         <div className={`container`}>
             <div className="columns">

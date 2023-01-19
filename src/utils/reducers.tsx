@@ -21,9 +21,9 @@ export type LeagueTypeForm = {
     maxProspects: bigint | null;
     draftRightsGoalie: bigint | null;
     draftRightsSkater: bigint | null;
-    adminID: string;
+    adminId: string;
     admin: string;
-    commissionerID: string;
+    commissionerId: string;
     commissioner: string;
 };
 

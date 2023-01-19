@@ -8,10 +8,12 @@ import Prospects from "../prospects";
 import Franchise from "../franchise";
 import style from "./style.module.css";
 import { UserType, LeagueType } from "../../components/app";
+import { FranchiseType } from "../../utils/reducers";
 
 const AdminBoard: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     const [league, setLeague] = useState<LeagueType>();
+    const [franchises, setFranchises] = useState<FranchiseType[]>([]);
     const [users, setUsers] = useState<UserType[]>([]);
 
     useEffect(() => {
@@ -31,6 +33,7 @@ const AdminBoard: FunctionalComponent = () => {
         // get all leagues (array only contains lakelandcup)
         get(`${process.env.BASE_URL_FANTASY_SVC}/leagues`)
             .then((data) => {
+                console.log(data);
                 if (data.status == 401 || data.result.length == 0) {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
@@ -39,6 +42,20 @@ const AdminBoard: FunctionalComponent = () => {
                 }
             })
             .catch((err) => console.log(err));
+
+        if (league !== undefined) {
+            get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchises`)
+                .then((data) => {
+                    if (data.status == 401 || data.result.length == 0) {
+                        // TODO: handle error api response
+                        console.log(`API response code ${data.status}`);
+                    } else {
+                        setFranchises(data.result);
+                        console.log(data);
+                    }
+                })
+                .catch((err) => console.log(err));
+        }
     }, [authenticated]);
 
     return (

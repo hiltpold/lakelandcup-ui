@@ -20,7 +20,14 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
     league,
 }) => {
     const [formData, setFormData] = useReducer(formReducer<FranchiseType>, initialFranchise);
+    const { authenticated, setAuthenticated } = useContext(AuthContext);
     const { franchiseState, setFranchiseState } = useContext(FranchiseContext);
+
+    useEffect(() => {
+        console.log("<Franchise>");
+        // get all leagues (array only contains lakelandcup)
+        console.log(league);
+    }, [authenticated]);
 
     const handleChange = ({
         currentTarget,
@@ -73,10 +80,6 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
             console.error("League is undefined.");
         }
     };
-
-    useEffect(() => {
-        console.log("<Franchise>");
-    }, []);
 
     return (
         <div className={`container`}>

@@ -26,6 +26,7 @@ export type FranchiseType = {
 export type LeagueType = {
     ID: string;
     Name: string;
+    FoundationYear: string;
     Admin: string;
     AdminID: string;
     Commissioner: string;
@@ -41,19 +42,6 @@ export type LeagueType = {
 const App: FunctionalComponent = () => {
     useEffect(() => {
         console.log("<App>");
-        // get user information, check if signed in already
-        /*
-        get(`${process.env.BASE_URL_AUTH_SVC}/user/info`)
-            .then((data) => {
-                if (data.status == 401) {
-                    // TODO: handle error api response
-                    console.log(`API response code ${data.status}`);
-                } else {
-                    setInitAuth({ id: data.userId, state: true });
-                }
-            })
-            .catch((err) => console.log(err));
-            */
     }, []);
 
     return (
