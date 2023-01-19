@@ -65,7 +65,7 @@ const AdminBoard: FunctionalComponent = () => {
                 </div>
             </div>
             <Router>
-                <League path="/adminboard/league" users={users} />
+                <League path="/adminboard/league" users={users} league={league} />
                 <Franchise path="/adminboard/franchise" users={users} league={league} />
                 <Prospects path="/adminboard/prospects" />
             </Router>

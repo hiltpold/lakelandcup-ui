@@ -21,7 +21,7 @@ export type UserType = {
     name: string;
 };
 export type FranchiseType = {
-    ID: string;
+    id: string;
 };
 export type LeagueType = {
     ID: string;
@@ -30,11 +30,11 @@ export type LeagueType = {
     AdminID: string;
     Commissioner: string;
     CommissionerID: string;
-    DraftRightsGoalie: number;
-    DraftRightsSkater: number;
-    FoundationYear: string;
-    MaxFranchises: number;
-    MaxProspects: number;
+    DraftRightsGoalie: bigint;
+    DraftRightsSkater: bigint;
+    DoundationYear: string;
+    MaxFranchises: bigint;
+    MaxProspects: bigint;
     Franchises: FranchiseType[];
 };
 

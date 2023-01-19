@@ -5,9 +5,12 @@ import { FranchiseContext } from "../../contexts/fantasy";
 import style from "./style.module.css";
 import formReducer, { FormEnum, FranchiseType } from "../../utils/reducers";
 import { UserType, LeagueType } from "../../components/app";
+import post, { get } from "../../utils/requests";
 
 const initialFranchise = {
     name: "",
+    ownerId: "",
+    ownerName: "",
     foundationYear: "",
     leagueID: "",
 };
@@ -17,14 +20,21 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
     league,
 }) => {
     const [formData, setFormData] = useReducer(formReducer<FranchiseType>, initialFranchise);
-    const { authenticated, setAuthenticated } = useContext(AuthContext);
     const { franchiseState, setFranchiseState } = useContext(FranchiseContext);
 
     const handleChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
-        console.log(currentTarget.name);
-        console.log(currentTarget.value);
+        if (currentTarget.name == "ownerId") {
+            const userName = users.find((u) => u.id === currentTarget.value);
+            setFormData({
+                type: FormEnum.Set,
+                payload: {
+                    name: "ownerName",
+                    value: userName !== undefined ? userName.name : "",
+                },
+            });
+        }
         setFormData({
             type: FormEnum.Set,
             payload: { name: currentTarget.name, value: currentTarget.value },
@@ -39,8 +49,29 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                 type: FormEnum.Set,
                 payload: { name: "leagueID", value: league.ID },
             });
+
+            if (
+                formData.leagueID === "" ||
+                formData.name === "" ||
+                formData.foundationYear === "" ||
+                formData.ownerName === "" ||
+                formData.ownerId === ""
+            ) {
+                console.error("One Form field is empty");
+            } else {
+                post(`${process.env.BASE_URL_FANTASY_SVC}/franchise`, formData).then((data) => {
+                    if (data.status == 201) {
+                        console.log(data);
+                        console.log(`API response code ${data.status}`);
+                    } else {
+                        // TODO: handle error api response
+                        console.log(`API response code ${data.status}`);
+                    }
+                });
+            }
+        } else {
+            console.error("League is undefined.");
         }
-        console.log(formData);
     };
 
     useEffect(() => {
@@ -67,7 +98,7 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                             <label className="form-label">
                                 <input
                                     className="form-input lakelandcup-input-form"
-                                    name="franchiseName"
+                                    name="name"
                                     type="text"
                                     placeholder="franchise name"
                                     onChange={handleChange}
@@ -83,10 +114,10 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                                     onChange={handleChange}
                                 />
                             </label>
-                            <label className={`form-label ${style.label}`}>Franchise Owner</label>
+                            <label className={`form-label ${style.label}`}>Owner</label>
                             <select
                                 class="form-select"
-                                name="franchiseOwner"
+                                name="ownerId"
                                 type="text"
                                 onChange={handleChange}
                             >

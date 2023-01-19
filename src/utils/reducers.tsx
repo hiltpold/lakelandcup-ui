@@ -14,7 +14,7 @@ type ActionMap<M extends { [index: string]: any }> = {
           };
 };
 
-export type LeagueType = {
+export type LeagueTypeForm = {
     name: string;
     foundationYear: string;
     maxFranchises: bigint | null;
@@ -29,6 +29,8 @@ export type LeagueType = {
 
 export type FranchiseType = {
     name: string;
+    ownerId: string;
+    ownerName: string;
     foundationYear: string;
     leagueID: string;
 };

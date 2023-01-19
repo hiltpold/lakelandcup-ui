@@ -51,9 +51,6 @@ const SignIn: FunctionalComponent = () => {
                 }
             });
         }
-        setTimeout(() => {
-            setSubmitting(false);
-        }, 3000);
     };
     if (submitting == true && authenticated.state == true && redirect == true) {
         return <Redirect to="/"></Redirect>;
