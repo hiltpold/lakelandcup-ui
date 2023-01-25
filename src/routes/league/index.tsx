@@ -172,12 +172,14 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
 
     useEffect(() => {
         console.log("<League>");
-    }, []);
+    }, [authenticated]);
 
     return (
         <div className={`container`}>
             <div className="columns">
-                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.league}`}>
+                <div
+                    className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.league}`}
+                >
                     <form onSubmit={league === undefined ? handleCreate : handleUpdate}>
                         <div className="form-group">
                             <label className={`form-label ${style.label}`}>League Name</label>

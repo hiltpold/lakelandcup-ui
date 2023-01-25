@@ -8,19 +8,6 @@ import post, { get } from "../../utils/requests";
 const Navbar: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
 
-    // TODO: correct type
-    const handleSignout = ({ currentTarget }: any) => {
-        // sign out
-        get(`${process.env.BASE_URL_AUTH_SVC}/signout`).then((data) => {
-            if (data.status == 200) {
-                setAuthenticated({ id: "", state: false });
-            } else {
-                // TODO: handle error api response
-                console.log(`API response code ${data.status}`);
-            }
-        });
-    };
-
     return (
         <header className={`navbar ${style.navbar}`}>
             <section className="navbar-section"></section>
@@ -32,21 +19,7 @@ const Navbar: FunctionalComponent = () => {
                     Admin
                 </a>
             </section>
-            <section className="navbar-section">
-                {authenticated.state ? (
-                    <a
-                        className="btn btn-link text-dark text-tiny"
-                        href="/"
-                        onClick={handleSignout}
-                    >
-                        Sign Out
-                    </a>
-                ) : (
-                    <a className="btn btn-link text-dark text-tiny" href="/signin">
-                        Sign In
-                    </a>
-                )}
-            </section>
+            <section className="navbar-section"></section>
         </header>
     );
 };

@@ -9,6 +9,7 @@ import Franchise from "../franchise";
 import style from "./style.module.css";
 import { UserType, LeagueType } from "../../components/app";
 import { FranchiseType } from "../../utils/reducers";
+import SignIn from "../../routes/signin";
 
 const AdminBoard: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
@@ -58,10 +59,27 @@ const AdminBoard: FunctionalComponent = () => {
         }
     }, [authenticated]);
 
-    return (
+    // TODO: correct type
+    const handleSignout = ({ currentTarget }: any) => {
+        // sign out
+        get(`${process.env.BASE_URL_AUTH_SVC}/signout`).then((data) => {
+            if (data.status == 200) {
+                setAuthenticated({ id: "", state: false });
+            } else {
+                // TODO: handle error api response
+                console.log(`API response code ${data.status}`);
+            }
+        });
+    };
+
+    return authenticated &&
+        league &&
+        (league.AdminID === authenticated.id || league.CommissionerID === authenticated.id) ? (
         <div className={`container`}>
             <div className="columns">
-                <div className={`column col-2 col-mx-auto col-xs-12 col-lg-6 ${style.league}`}>
+                <div
+                    className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.league}`}
+                >
                     <ul class="tab tab-block" style={"margin-bottom:0.5rem"}>
                         <li class="tab-item">
                             <a className="text-tiny" href="/adminboard/league">
@@ -74,8 +92,13 @@ const AdminBoard: FunctionalComponent = () => {
                             </a>
                         </li>
                         <li class="tab-item">
-                            <a className="text-tiny" href="adminboard/prospect">
+                            <a className="text-tiny" href="/adminboard/prospect">
                                 Prospects
+                            </a>
+                        </li>
+                        <li class="tab-item">
+                            <a className="text-error text-tiny" href="/" onClick={handleSignout}>
+                                Sign Out
                             </a>
                         </li>
                     </ul>
@@ -84,12 +107,11 @@ const AdminBoard: FunctionalComponent = () => {
             <Router>
                 <League path="/adminboard/league" users={users} league={league} />
                 <Franchise path="/adminboard/franchise" users={users} league={league} />
-                <Prospects path="/adminboard/prospects" />
+                <Prospects path="/adminboard/prospects" users={users} league={league} />
             </Router>
-            <div class="text-center">
-                <pre>{`League State: \n${JSON.stringify(league, null, 2)}`}</pre>
-            </div>
         </div>
+    ) : (
+        <SignIn path="/signin" />
     );
 };
 export default AdminBoard;

@@ -53,7 +53,7 @@ const SignIn: FunctionalComponent = () => {
         }
     };
     if (submitting == true && authenticated.state == true && redirect == true) {
-        return <Redirect to="/"></Redirect>;
+        return <Redirect to="/adminboard"></Redirect>;
     } else {
         return (
             <div className={`container `}>
@@ -89,7 +89,6 @@ const SignIn: FunctionalComponent = () => {
                                 </div>
                                 <div>
                                     <b>
-                                        {" "}
                                         Please register <a href="/signup">here</a>.
                                     </b>
                                 </div>

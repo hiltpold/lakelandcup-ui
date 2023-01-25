@@ -84,7 +84,9 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
     return (
         <div className={`container`}>
             <div className="columns">
-                <div className={`column col-3 col-mx-auto col-xs-12 col-lg-6 ${style.franchise}`}>
+                <div
+                    className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.franchise}`}
+                >
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label className={`form-label ${style.label}`}>League</label>
