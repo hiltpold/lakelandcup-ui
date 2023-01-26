@@ -1,22 +1,28 @@
 import { h } from "preact";
 import { FunctionComponent } from "preact/compat";
-import { useContext, useEffect, useState } from "preact/hooks";
-import { AuthContext } from "../../contexts/auth";
 import style from "./style.module.css";
-import formReducer, { FormEnum, LeagueTypeForm } from "../../utils/reducers";
-import Grid from "../../components/grid";
-import { UserType, LeagueType } from "../../components/app";
 import { AgGridReact } from "ag-grid-react";
-import { GridOptions, RowSelectedEvent, ColDef, GridReadyEvent } from "ag-grid-community";
+import { GridReadyEvent } from "ag-grid-community";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 
-const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
-    users,
-    league,
+export const defaultColDef = {
+    sortable: true,
+    resizable: true,
+    flex: 1,
+    minWidth: 100,
+};
+
+const Grid: FunctionComponent<{ rowData: any[]; columnDefs: any[] }> = ({
+    rowData,
+    columnDefs,
 }) => {
-    const { authenticated, setAuthenticated } = useContext(AuthContext);
+    const onGridReady = (params: GridReadyEvent) => {
+        params.api.sizeColumnsToFit();
+    };
+
+    /*
     const [rowData] = useState([
         { make: "Toyota", model: "Celica", price: 35000, details: "Hallo" },
         { make: "Ford", model: "Mondeo", price: 32000, details: "Hallo" },
@@ -29,10 +35,7 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
         { field: "price" },
         { field: "details" },
     ]);
-
-    const onGridReady = (params: GridReadyEvent) => {
-        params.api.sizeColumnsToFit();
-    };
+*/
     /*
     useEffect(() => {
         console.log("<Prospects>");
@@ -41,12 +44,19 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
 
     return (
         <div className={`columns`}>
-            <div className={`column col-8 col-mx-auto col-xs-12`}>
+            <div className={`column col-6 col-mx-auto col-xs-12`}>
                 <div className={`ag-theme-alpine`}>
-                    <Grid rowData={rowData} columnDefs={columnDefs} />
+                    <AgGridReact
+                        rowData={rowData}
+                        columnDefs={columnDefs}
+                        defaultColDef={defaultColDef}
+                        domLayout="autoHeight"
+                        alwaysShowHorizontalScroll={true}
+                        onGridReady={onGridReady}
+                    />
                 </div>
             </div>
         </div>
     );
 };
-export default Prospects;
+export default Grid;

@@ -78,7 +78,7 @@ const AdminBoard: FunctionalComponent = () => {
         <div className={`container`}>
             <div className="columns">
                 <div
-                    className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.league}`}
+                    className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.adminboard}`}
                 >
                     <ul class="tab tab-block" style={"margin-bottom:0.5rem"}>
                         <li class="tab-item">
@@ -92,7 +92,7 @@ const AdminBoard: FunctionalComponent = () => {
                             </a>
                         </li>
                         <li class="tab-item">
-                            <a className="text-tiny" href="/adminboard/prospect">
+                            <a className="text-tiny" href="/adminboard/prospects">
                                 Prospects
                             </a>
                         </li>
