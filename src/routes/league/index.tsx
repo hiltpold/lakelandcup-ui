@@ -1,7 +1,6 @@
 import { FunctionalComponent, h, JSX } from "preact";
-import { useContext, useEffect, useState, useReducer, useImperativeHandle } from "preact/hooks";
+import { useContext, useEffect, useState, useReducer } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
-import { LeagueContext } from "../../contexts/fantasy";
 import post, { get } from "../../utils/requests";
 import style from "./style.module.css";
 import { UserType, LeagueType } from "../../components/app";
