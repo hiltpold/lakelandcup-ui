@@ -1,6 +1,6 @@
 import { h, JSX } from "preact";
 import { FunctionComponent } from "preact/compat";
-import { useContext, useEffect, useState } from "preact/hooks";
+import { useContext, useEffect, useState, useReducer } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
 import style from "./style.module.css";
 import formReducer, { FormEnum, LeagueTypeForm } from "../../utils/reducers";
@@ -41,13 +41,13 @@ type Prospect = {
 const columnDefsProspect = [
     { field: "FullName" },
     { field: "NhlTeam" },
-    { field: "NhlDraftRound" },
-    { field: "NhlPickInRound" },
-    { field: "NhlDraftPickOverall" },
+    // { field: "NhlDraftRound" },
+    // { field: "NhlPickInRound" },
+    // { field: "NhlDraftPickOverall" },
     { field: "Birthdate" },
-    { field: "PositionCode" },
-    { field: "Weight" },
-    { field: "Height" },
+    // { field: "PositionCode" },
+    // { field: "Weight" },
+    // { field: "Height" },
     { field: "ID", hide: true },
     { field: "LeagueID", hide: true },
     { field: "FranchiseID", hide: true },
@@ -56,7 +56,7 @@ const columnDefsProspect = [
 const gridOptionsPropspectInit = {
     columnDefs: columnDefsProspect,
     rowData: [],
-    rowHeight: 40,
+    rowHeight: 35,
     onSelectionChanged: undefined,
 };
 
@@ -66,22 +66,122 @@ type GridOptionsProspects = {
     rowHeight: number;
 };
 
+type Franchise = {
+    ID: string;
+    Name: string;
+};
+
+type Draft = {
+    draftYear: string;
+    draftRound: string;
+    draftPickInRound: string;
+    draftPickOverall: string;
+    prospectID: string;
+    franchiseID: string;
+    leagueID: string;
+};
+
+const initDraftPick = {
+    draftYear: "",
+    draftRound: "",
+    draftPickInRound: "",
+    draftPickOverall: "",
+    prospectID: "",
+    franchiseID: "",
+    leagueID: "",
+};
+
 const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
     users,
     league,
 }) => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
+    const [formData, setFormData] = useReducer(formReducer<Draft>, initDraftPick);
     const [search, setSearch] = useState<string>("");
+    const [franchises, setFranchises] = useState<Franchise[]>([]);
+    const [prospectId, setProspectId] = useState<string>("");
     const [gridOptions, setGridOptions] = useState<GridOptions>(gridOptionsPropspectInit);
 
     const onSelectionChanged = (params: any) => {
-        console.log(params.api.getSelectedRows());
+        const selectedRow = params.api.getSelectedRows()[0];
+        console.log(selectedRow);
+        setFormData({
+            type: FormEnum.Set,
+            payload: {
+                name: "prospectID",
+                value: selectedRow.ID,
+            },
+        });
+        setProspectId(selectedRow.ID);
     };
 
     const handleChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
-        setSearch(currentTarget.value);
+        if (currentTarget.name == "franchiseID") {
+            setFormData({
+                type: FormEnum.Set,
+                payload: {
+                    name: "franchiseID",
+                    value: currentTarget.value,
+                },
+            });
+        }
+        setFormData({
+            type: FormEnum.Set,
+            payload: {
+                name: currentTarget.name,
+                value: currentTarget.value,
+            },
+        });
+    };
+
+    const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
+        event.preventDefault();
+        if (
+            formData.prospectID !== undefined &&
+            formData.prospectID !== null &&
+            formData.prospectID !== "" &&
+            formData.franchiseID !== undefined &&
+            formData.franchiseID !== null &&
+            formData.franchiseID !== "" &&
+            formData.prospectID !== undefined &&
+            formData.prospectID !== null &&
+            formData.prospectID !== "" &&
+            formData.draftYear !== undefined &&
+            formData.draftYear !== null &&
+            formData.draftYear !== "" &&
+            formData.draftRound !== undefined &&
+            formData.draftRound !== null &&
+            formData.draftRound !== "" &&
+            formData.draftPickInRound !== undefined &&
+            formData.draftPickInRound !== null &&
+            formData.draftPickInRound !== ""
+        ) {
+            formData.draftPickOverall =
+                formData.draftRound === "1"
+                    ? formData.draftPickInRound
+                    : (
+                          (parseInt(formData.draftRound) - 1) * pickInRound.length +
+                          parseInt(formData.draftPickInRound)
+                      ).toString();
+            /*
+            setFormData({
+                type: FormEnum.Set,
+                payload: {
+                    name: "draftPickOverall",
+                    value:
+                        formData.draftRound === "1"
+                            ? formData.draftPickInRound
+                            : (
+                                  (parseInt(formData.draftRound) - 1) * pickInRound.length +
+                                  parseInt(formData.draftPickInRound)
+                              ).toString(),
+                },
+            });
+            */
+            console.log(formData);
+        }
     };
 
     const searchProspects = (e: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
@@ -93,7 +193,7 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
                         // TODO: handle error api response
                         console.log(`API response code ${data.status}`);
                     } else {
-                        if (data.prospects.length >= 0) {
+                        if (data.prospects && data.prospects.length >= 0) {
                             const rowData = data.prospects.map((p: Prospect) => {
                                 return {
                                     FullName: p.FullName,
@@ -125,71 +225,108 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
     useEffect(() => {
         console.log("<Prospects>");
         setGridOptions({ ...gridOptions, onSelectionChanged: onSelectionChanged });
+        if (league !== undefined && league !== null) {
+            get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchises`).then(
+                (data) => {
+                    if (data.result !== undefined) {
+                        setFranchises(
+                            data.result.map((f: Franchise) => {
+                                return {
+                                    ID: f.ID,
+                                    Name: f.Name,
+                                };
+                            }),
+                        );
+                    }
+                },
+            );
+            setFormData({
+                type: FormEnum.Set,
+                payload: {
+                    name: "leagueID",
+                    value: league.ID,
+                },
+            });
+        }
     }, [authenticated, search]);
 
     return (
         <div className={`columns`}>
             <div
-                className={`column col-8 col-mx-auto col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12`}
+                className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.prospects_picks}`}
             >
-                <form>
-                    <div
-                        className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.prospects_picks}`}
-                    >
+                <form onSubmit={handleDraft}>
+                    <div className="form-group">
+                        <label className={`form-label ${style.label}`}>Draft Year</label>
+                        <select
+                            class="form-select"
+                            name="draftYear"
+                            type="text"
+                            onChange={handleChange}
+                        >
+                            <option value="">{""}</option>
+                            {draftYear.map((dy) => (
+                                <option value={dy}>{dy}</option>
+                            ))}
+                        </select>
+                        <label className={`form-label ${style.label}`}>Franchise</label>
+                        <select
+                            class="form-select"
+                            name="franchiseID"
+                            type="text"
+                            onChange={handleChange}
+                        >
+                            <option value="">{""}</option>
+                            {franchises.map((f) => (
+                                <option value={f.ID}>{f.Name}</option>
+                            ))}
+                        </select>
+                        <label className={`form-label ${style.label}`}>Draft Round</label>
+                        <select
+                            class="form-select"
+                            name="draftRound"
+                            type="text"
+                            onChange={handleChange}
+                        >
+                            <option value="">{""}</option>
+                            {draftRounds.map((dr) => (
+                                <option value={dr}>{dr}</option>
+                            ))}
+                        </select>
+                        <label className={`form-label ${style.label}`}>Pick in Round</label>
+                        <select
+                            class="form-select"
+                            name="draftPickInRound"
+                            type="text"
+                            onChange={handleChange}
+                        >
+                            <option value="">{""}</option>
+                            {pickInRound.map((pir) => (
+                                <option value={pir}>{pir}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-horizontal">
                         <div className="form-group">
-                            <label className={`form-label ${style.label}`}>Draft Year</label>
-                            <select
-                                class="form-select"
-                                name="commissionerID"
+                            <input
+                                className="column col-10 col-xs-10 form-input lakelandcup-input-form"
+                                name="name"
                                 type="text"
-                                onChange={handleChange}
-                            >
-                                {draftYear.map((dy) => (
-                                    <option value={dy}>{dy}</option>
-                                ))}
-                            </select>
-                            <label className={`form-label ${style.label}`}>Draft Round</label>
-                            <select
-                                class="form-select"
-                                name="commissionerID"
-                                type="text"
-                                onChange={handleChange}
-                            >
-                                {draftRounds.map((dr) => (
-                                    <option value={dr}>{dr}</option>
-                                ))}
-                            </select>
-                            <label className={`form-label ${style.label}`}>Pick in Round</label>
-                            <select
-                                class="form-select"
-                                name="commissionerID"
-                                type="text"
-                                onChange={handleChange}
-                            >
-                                {pickInRound.map((pir) => (
-                                    <option value={pir}>{pir}</option>
-                                ))}
-                            </select>
+                                placeholder="search prospects"
+                                onKeyUp={searchProspects}
+                            />
+                            <button className="column col-2 col-xs-2 btn">go</button>
                         </div>
                     </div>
+                    {gridOptions.rowData === null || gridOptions.rowData === undefined ? (
+                        <div></div>
+                    ) : (
+                        <Grid gridOptions={gridOptions} />
+                    )}
+                    <label className="form-label">
+                        <button className="btn">Draft</button>
+                    </label>
                 </form>
-                <div className="form-horizontal">
-                    <div className="form-group">
-                        <input
-                            className="column col-10 col-xs-10 form-input lakelandcup-input-form"
-                            name="name"
-                            type="text"
-                            placeholder="search prospects"
-                            onKeyUp={searchProspects}
-                        />
-                        <button className="column col-2 col-xs-2 btn btn-primary">GO</button>
-                    </div>
-                </div>
-                {gridOptions.rowData === null || gridOptions.rowData === undefined ? (
-                    <div></div>
-                ) : (
-                    <Grid gridOptions={gridOptions} />
-                )}
             </div>
         </div>
     );

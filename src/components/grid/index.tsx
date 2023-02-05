@@ -14,13 +14,14 @@ const Grid: FunctionComponent<{ gridOptions: GridOptions }> = ({ gridOptions }) 
     const onGridReady = (params: GridReadyEvent) => {
         params.api.sizeColumnsToFit();
         gridApiRef.current = params.api; // <= assigned gridApi value on Grid ready
+        params.api.setHeaderHeight(35);
     };
 
     const defaultColDef: ColDef = {
         sortable: true,
         resizable: true,
         flex: 1,
-        //minWidth: 10,
+        minWidth: 10,
     };
 
     useEffect(() => {
@@ -53,9 +54,10 @@ const Grid: FunctionComponent<{ gridOptions: GridOptions }> = ({ gridOptions }) 
                 onSelectionChanged={gridOptions.onSelectionChanged}
                 onGridReady={onGridReady}
                 defaultColDef={defaultColDef}
-                domLayout="autoHeight"
-                alwaysShowHorizontalScroll={true}
+                //domLayout="autoHeight"
                 rowMultiSelectWithClick={true}
+                alwaysShowHorizontalScroll={true}
+                alwaysShowVerticalScroll={true}
             />
         </div>
     );
