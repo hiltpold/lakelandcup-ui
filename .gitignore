@@ -3,3 +3,4 @@ node_modules
 dist
 # IDE
 .vscode
+.DS_Store
