@@ -3,41 +3,50 @@ import { useContext, useReducer, useEffect } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
 import { FranchiseContext } from "../../contexts/fantasy";
 import style from "./style.module.css";
-import formReducer, { FormEnum, FranchiseType } from "../../utils/reducers";
+import formReducer, { FormEnum, FranchiseFormType } from "../../utils/reducers";
 import { UserType, LeagueType } from "../../components/app";
 import post, { get } from "../../utils/requests";
+import formValidator from "../../utils/validator";
 
 const initialFranchise = {
-    name: "",
-    ownerId: "",
-    ownerName: "",
-    foundationYear: "",
-    leagueID: "",
+    Name: "",
+    OwnerId: "",
+    OwnerName: "",
+    FoundationYear: "",
+    LeagueID: "",
 };
 
 const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
     users,
     league,
 }) => {
-    const [formData, setFormData] = useReducer(formReducer<FranchiseType>, initialFranchise);
+    const [formData, setFormData] = useReducer(formReducer<FranchiseFormType>, initialFranchise);
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     const { franchiseState, setFranchiseState } = useContext(FranchiseContext);
 
     useEffect(() => {
         console.log("<Franchise>");
         // get all leagues (array only contains lakelandcup)
+        if (league !== undefined) {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "LeagueID", value: league.ID },
+            });
+        } else {
+            console.error("League is undefined.");
+        }
         console.log(league);
     }, [authenticated]);
 
     const handleChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
-        if (currentTarget.name == "ownerId") {
+        if (currentTarget.name == "OwnerId") {
             const userName = users.find((u) => u.id === currentTarget.value);
             setFormData({
                 type: FormEnum.Set,
                 payload: {
-                    name: "ownerName",
+                    name: "OwnerName",
                     value: userName !== undefined ? userName.name : "",
                 },
             });
@@ -51,33 +60,19 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
 
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
-        if (league !== undefined) {
-            setFormData({
-                type: FormEnum.Set,
-                payload: { name: "leagueID", value: league.ID },
+        console.log(formValidator(formData));
+        if (formValidator(formData)) {
+            post(`${process.env.BASE_URL_FANTASY_SVC}/franchise`, formData).then((data) => {
+                if (data.status == 201) {
+                    console.log(data);
+                    console.log(`API response code ${data.status}`);
+                } else {
+                    // TODO: handle error api response
+                    console.log(`API response code ${data.status}`);
+                }
             });
-
-            if (
-                formData.leagueID === "" ||
-                formData.name === "" ||
-                formData.foundationYear === "" ||
-                formData.ownerName === "" ||
-                formData.ownerId === ""
-            ) {
-                console.error("One Form field is empty");
-            } else {
-                post(`${process.env.BASE_URL_FANTASY_SVC}/franchise`, formData).then((data) => {
-                    if (data.status == 201) {
-                        console.log(data);
-                        console.log(`API response code ${data.status}`);
-                    } else {
-                        // TODO: handle error api response
-                        console.log(`API response code ${data.status}`);
-                    }
-                });
-            }
         } else {
-            console.error("League is undefined.");
+            console.error("One Form field is empty");
         }
     };
 
@@ -102,7 +97,7 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                         <label className="form-label">
                             <input
                                 className="form-input lakelandcup-input-form"
-                                name="name"
+                                name="Name"
                                 type="text"
                                 placeholder="franchise name"
                                 onChange={handleChange}
@@ -112,7 +107,7 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                         <label className="form-label">
                             <input
                                 className="form-input lakelandcup-input-form"
-                                name="foundationYear"
+                                name="FoundationYear"
                                 type="text"
                                 placeholder="foundation year"
                                 onChange={handleChange}
@@ -121,7 +116,7 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                         <label className={`form-label ${style.label}`}>Owner</label>
                         <select
                             class="form-select"
-                            name="ownerId"
+                            name="OwnerId"
                             type="text"
                             onChange={handleChange}
                         >

@@ -2,7 +2,7 @@ import { h } from "preact";
 import { FunctionComponent, useEffect, useRef } from "preact/compat";
 import style from "./style.module.css";
 import { AgGridReact } from "ag-grid-react";
-import { GridReadyEvent, GridOptions, ColDef } from "ag-grid-community";
+import { GridReadyEvent, GridOptions, ColDef, AgGridEvent } from "ag-grid-community";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -13,8 +13,12 @@ const Grid: FunctionComponent<{ gridOptions: GridOptions }> = ({ gridOptions }) 
 
     const onGridReady = (params: GridReadyEvent) => {
         params.api.sizeColumnsToFit();
-        gridApiRef.current = params.api; // <= assigned gridApi value on Grid ready
+        gridApiRef.current = params.api;
         params.api.setHeaderHeight(35);
+    };
+
+    const onDragStopped = (params: AgGridEvent) => {
+        params.api.refreshCells();
     };
 
     const defaultColDef: ColDef = {
@@ -28,30 +32,17 @@ const Grid: FunctionComponent<{ gridOptions: GridOptions }> = ({ gridOptions }) 
         console.log("<Grid>");
         if (gridApiRef.current !== null) {
             gridApiRef.current.setRowData(gridOptions.rowData);
-            ///gridApiRef.current.onSelectionChanged(gridOptions.onSelectionChanged);
         }
-
-        //gridOptions.api.setRowData([]);
-        //gridOptions.api?.setRowData(gridOptions.rowData);
-        /*
-        if (
-            gridOptions.api === null ||
-            gridOptions.api === undefined ||
-            gridOptions.rowData === undefined ||
-            gridOptions.rowData === null
-        ) {
-            console.log(gridOptions);
-        } else {
-            gridOptions.api.setRowData(gridOptions.rowData);
-        }
-        */
     }, [gridOptions]);
+
     return (
         <div className={`ag-theme-alpine ${style.grid}`}>
             <AgGridReact
                 gridOptions={gridOptions}
-                rowSelection="single"
+                //rowSelection={gridOptions.rowSelection}
+                onDragStopped={gridOptions.onDragStopped}
                 onSelectionChanged={gridOptions.onSelectionChanged}
+                onRowEditingStopped={gridOptions.onRowEditingStopped}
                 onGridReady={onGridReady}
                 defaultColDef={defaultColDef}
                 //domLayout="autoHeight"

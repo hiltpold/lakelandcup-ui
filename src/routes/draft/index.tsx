@@ -3,7 +3,7 @@ import { FunctionComponent } from "preact/compat";
 import { useContext, useEffect, useState, useReducer } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
 import style from "./style.module.css";
-import formReducer, { FormEnum, LeagueTypeForm } from "../../utils/reducers";
+import formReducer, { FormEnum, LeagueFormType } from "../../utils/reducers";
 import Grid from "../../components/grid";
 import { UserType, LeagueType } from "../../components/app";
 import { AgGridReact } from "ag-grid-react";
@@ -102,7 +102,7 @@ const initDraftPick = {
     leagueID: "",
 };
 
-const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
+const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
     users,
     league,
 }) => {
@@ -173,7 +173,7 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
         }
     };
 
-    const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
+    const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement | HTMLButtonElement, Event>) => {
         event.preventDefault();
         if (
             formData.prospectID !== undefined &&
@@ -193,16 +193,33 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
                 formData.draftPick = JSON.parse(formData.draftPick);
             }
             // post data
-            post(`${process.env.BASE_URL_FANTASY_SVC}/prospect/draft`, formData).then((data) => {
-                if (data.status == 201) {
-                    console.log(`API response code ${data.status}`);
-                } else {
-                    // TODO: handle error api response
-                    console.log(`API response ${data}`);
-                    console.log(data);
-                }
-            });
-            console.log(formData);
+            if (event.submitter.textContent == "Draft") {
+                post(`${process.env.BASE_URL_FANTASY_SVC}/prospect/draft`, formData).then(
+                    (data) => {
+                        if (data.status == 201) {
+                            console.log(`API response code ${data.status}`);
+                        } else {
+                            // TODO: handle error api response
+                            console.log(`API response ${data}`);
+                            console.log(data);
+                        }
+                    },
+                );
+            } else if (event.submitter.textContent == "Undraft") {
+                post(`${process.env.BASE_URL_FANTASY_SVC}/prospect/undraft`, formData).then(
+                    (data) => {
+                        if (data.status == 201) {
+                            console.log(`API response code ${data.status}`);
+                        } else {
+                            // TODO: handle error api response
+                            console.log(`API response ${data}`);
+                            console.log(data);
+                        }
+                    },
+                );
+            } else {
+                console.log(formData);
+            }
         }
     };
 
@@ -216,7 +233,6 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
                         console.log(`API response code ${data.status}`);
                     } else {
                         if (data.prospects && data.prospects.length >= 0) {
-                            console.log(data.prospects);
                             const prospects = data.prospects.map((p: Prospect) => {
                                 return {
                                     ID: p.ID,
@@ -247,9 +263,10 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
                                 };
                                 const fID = p.FranchiseID;
                                 if (fID !== undefined && fID !== null && fID !== "") {
-                                    const franchise: Franchise = await get(
-                                        `${process.env.BASE_URL_FANTASY_SVC}/franchise/${fID}}`,
+                                    const response = await get(
+                                        `${process.env.BASE_URL_FANTASY_SVC}/franchise/${fID}`,
                                     );
+                                    const franchise: Franchise = response.result;
                                     tmp.Franchise = franchise.Name;
                                 }
                                 return tmp;
@@ -360,12 +377,11 @@ const Prospects: FunctionComponent<{ users: UserType[]; league: LeagueType | und
                     ) : (
                         <Grid gridOptions={gridOptions} />
                     )}
-                    <label className="form-label">
-                        <button className="btn">Draft</button>
-                    </label>
+                    <button className="btn">Draft</button>
+                    <button className="btn">Undraft</button>
                 </form>
             </div>
         </div>
     );
 };
-export default Prospects;
+export default Draft;

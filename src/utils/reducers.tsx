@@ -14,25 +14,26 @@ type ActionMap<M extends { [index: string]: any }> = {
           };
 };
 
-export type LeagueTypeForm = {
-    name: string;
-    foundationYear: string;
-    maxFranchises: bigint | null;
-    maxProspects: bigint | null;
-    draftRightsGoalie: bigint | null;
-    draftRightsSkater: bigint | null;
-    adminId: string;
-    admin: string;
-    commissionerId: string;
-    commissioner: string;
+export type LeagueFormType = {
+    Name: string;
+    FoundationYear: string;
+    MaxFranchises: bigint | null;
+    MaxProspects: bigint | null;
+    DraftRightsGoalie: bigint | null;
+    DraftRightsSkater: bigint | null;
+    DraftRounds: bigint | null;
+    AdminID: string;
+    Admin: string;
+    CommissionerID: string;
+    Commissioner: string;
 };
 
-export type FranchiseType = {
-    name: string;
-    ownerId: string;
-    ownerName: string;
-    foundationYear: string;
-    leagueID: string;
+export type FranchiseFormType = {
+    Name: string;
+    OwnerId: string;
+    OwnerName: string;
+    FoundationYear: string;
+    LeagueID: string;
 };
 
 export type SignupType = {
@@ -51,7 +52,7 @@ export type SigninType = {
 type FormPayload = {
     [FormEnum.Set]: {
         name: string;
-        value: string;
+        value: string | number;
     };
 };
 

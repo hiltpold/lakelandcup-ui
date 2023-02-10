@@ -4,24 +4,27 @@ import { useContext, useEffect, useState } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
 import post, { get } from "../../utils/requests";
 import League from "../league";
-import Prospects from "../prospects";
+import Draft from "../draft";
+import Trade from "../trade";
 import Franchise from "../franchise";
 import style from "./style.module.css";
 import { UserType, LeagueType } from "../../components/app";
-import { FranchiseType } from "../../utils/reducers";
+import { FranchiseFormType } from "../../utils/reducers";
 import SignIn from "../../routes/signin";
 
 const AdminBoard: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     const [league, setLeague] = useState<LeagueType>();
-    const [franchises, setFranchises] = useState<FranchiseType[]>([]);
+    const [franchises, setFranchises] = useState<FranchiseFormType[]>([]);
     const [users, setUsers] = useState<UserType[]>([]);
 
     useEffect(() => {
         console.log("<AdminBoard>");
+
         // get all users
         get(`${process.env.BASE_URL_AUTH_SVC}/user/all`)
             .then((data) => {
+                console.log(data);
                 if (data.status == 401) {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
@@ -34,8 +37,13 @@ const AdminBoard: FunctionalComponent = () => {
         // get all leagues (array only contains lakelandcup)
         get(`${process.env.BASE_URL_FANTASY_SVC}/leagues`)
             .then((data) => {
-                console.log(data);
-                if (data.status == 401 || data.result.length == 0) {
+                console.log(data.result[0]);
+                if (
+                    data.status == 401 ||
+                    data.result === undefined ||
+                    data.result == null ||
+                    data.result.length == 0
+                ) {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
                 } else {
@@ -44,6 +52,7 @@ const AdminBoard: FunctionalComponent = () => {
             })
             .catch((err) => console.log(err));
 
+        // get all franchises in this league, if league was already created
         if (league !== undefined) {
             get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchises`)
                 .then((data) => {
@@ -52,7 +61,6 @@ const AdminBoard: FunctionalComponent = () => {
                         console.log(`API response code ${data.status}`);
                     } else {
                         setFranchises(data.result);
-                        console.log(data);
                     }
                 })
                 .catch((err) => console.log(err));
@@ -72,9 +80,7 @@ const AdminBoard: FunctionalComponent = () => {
         });
     };
 
-    return authenticated &&
-        league &&
-        (league.AdminID === authenticated.id || league.CommissionerID === authenticated.id) ? (
+    return authenticated ? ( //  &&league && (league.AdminID === authenticated.id || league.CommissionerID === authenticated.id)
         <div className={`container`}>
             <div className="columns">
                 <div
@@ -92,8 +98,13 @@ const AdminBoard: FunctionalComponent = () => {
                             </a>
                         </li>
                         <li class="tab-item">
-                            <a className="text-tiny" href="/adminboard/prospects">
-                                Prospects
+                            <a className="text-tiny" href="/adminboard/draft">
+                                Draft
+                            </a>
+                        </li>
+                        <li class="tab-item">
+                            <a className="text-tiny" href="/adminboard/trade">
+                                Trade
                             </a>
                         </li>
                         <li class="tab-item">
@@ -107,7 +118,8 @@ const AdminBoard: FunctionalComponent = () => {
             <Router>
                 <League path="/adminboard/league" users={users} league={league} />
                 <Franchise path="/adminboard/franchise" users={users} league={league} />
-                <Prospects path="/adminboard/prospects" users={users} league={league} />
+                <Draft path="/adminboard/draft" users={users} league={league} />
+                <Trade path="/adminboard/trade" users={users} league={league} />
             </Router>
         </div>
     ) : (
