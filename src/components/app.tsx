@@ -17,8 +17,9 @@ import Fantasy from "../contexts/fantasy";
 import internal from "stream";
 
 export type UserType = {
-    id: string;
-    name: string;
+    ID: string;
+    Name: string;
+    Role: string;
 };
 export type FranchiseType = {
     ID: string;

@@ -7,6 +7,7 @@ import { UserType, LeagueType } from "../../components/app";
 import formReducer, { FormEnum, LeagueFormType } from "../../utils/reducers";
 import Grid from "../../components/grid";
 import { GridOptions, AgGridEvent } from "ag-grid-community";
+import formValidator from "../../utils/validator";
 
 const isInteger = (num: string | number) => /^-?[0-9]+$/.test(num + "");
 
@@ -25,11 +26,11 @@ const initialLeague = {
     CommissionerID: "",
     Commissioner: "",
     FoundationYear: "",
-    MaxFranchises: null,
-    MaxProspects: null,
-    DraftRightsSkater: null,
-    DraftRightsGoalie: null,
-    DraftRounds: null,
+    MaxFranchises: 0,
+    MaxProspects: 0,
+    DraftRightsSkater: 0,
+    DraftRightsGoalie: 0,
+    DraftRounds: 0,
 };
 
 const columnDefsLottery = [
@@ -67,10 +68,10 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
     users,
     league,
 }) => {
+    const { authenticated, setAuthenticated } = useContext(AuthContext);
     const [formData, setFormData] = useReducer(formReducer<LeagueFormType>, initialLeague);
     const [formDataLottery, setFormDataLottery] = useState<DraftLottery[]>([]);
 
-    const { authenticated, setAuthenticated } = useContext(AuthContext);
     const [submitting, setSubmitting] = useState<boolean>(false);
     const [gridOptionsLottery, setGridOptionsLottery] =
         useState<GridOptions>(gridOptionsLotteryInit);
@@ -78,14 +79,20 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
     const handleChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
-        console.log(currentTarget.value);
         let name = currentTarget.name;
         let value = currentTarget.value;
 
-        if (currentTarget.name == "commissionerID") {
-            const userName = users.find((u) => u.id === currentTarget.value);
-            name = "commissioner";
-            value = userName !== undefined ? userName.name : "";
+        if (currentTarget.name === "CommissionerID") {
+            const userName = users.find((u) => u.ID === currentTarget.value);
+            setFormData({
+                type: FormEnum.Set,
+                payload: {
+                    name: "CommissionerID",
+                    value: currentTarget.value,
+                },
+            });
+            name = "Commissioner";
+            value = userName !== undefined ? userName.Name : "";
         }
 
         setFormData({
@@ -100,31 +107,21 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
     const handleCreateLeague = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
         // set signed in user as admin of league as admin
-        const adminUser = users.find((u) => u.id === authenticated.id);
         if (!submitting) {
             setSubmitting(true);
-            if (adminUser === undefined || adminUser.id === undefined) {
-                console.error("Signed In User is not stored in db. Should not happen.");
+            if (formValidator(formData)) {
+                // send league creation data to backend
+                post(`${process.env.BASE_URL_FANTASY_SVC}/league`, formData).then((data) => {
+                    if (data.status == 201) {
+                        console.log(`API response code ${data.status}`);
+                    } else {
+                        // TODO: handle error api response
+                        console.log(`API response code ${data.status}`);
+                    }
+                });
             } else {
-                setFormData({
-                    type: FormEnum.Set,
-                    payload: { name: "admin", value: adminUser.name },
-                });
-                setFormData({
-                    type: FormEnum.Set,
-                    payload: { name: "adminID", value: adminUser.id },
-                });
+                console.error("One or more league form entries are empty!");
             }
-
-            // send league creation data to backend
-            post(`${process.env.BASE_URL_FANTASY_SVC}/league`, formData).then((data) => {
-                if (data.status == 201) {
-                    console.log(`API response code ${data.status}`);
-                } else {
-                    // TODO: handle error api response
-                    console.log(`API response code ${data.status}`);
-                }
-            });
         }
 
         setTimeout(() => {
@@ -134,7 +131,6 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
 
     const handleUpdateLeague = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
-
         if (league !== undefined) {
             // create update from current league and form update
             const updates = Object.entries(formData).map((entry) => {
@@ -154,11 +150,9 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                 }
                 return acc;
             }, {});
-            console.log(update);
             // send update to fantasy backend
             post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}`, update).then((data) => {
                 if (data.status == 201) {
-                    console.log(data);
                     console.log(`API response code ${data.status}`);
                 } else {
                     // TODO: handle error api response
@@ -198,7 +192,11 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
 
     useEffect(() => {
         console.log("<League>");
+        console.log("--------------");
+        console.log(users);
         console.log(league);
+        console.log(authenticated);
+        console.log("--------------");
         if (league !== undefined && league.Franchises !== undefined) {
             const rowData = league.Franchises.map((f) => {
                 return {
@@ -214,6 +212,22 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                 onDragStopped: onLotteryDataChanged,
                 onRowDataUpdated: onLotteryDataChanged,
             });
+        }
+
+        const adminUser = users.find((u) => u.ID === authenticated.ID);
+        if (adminUser !== undefined && authenticated.Role === "admin") {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "Admin", value: adminUser.Name },
+            });
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "AdminID", value: adminUser.ID },
+            });
+        } else {
+            console.error(
+                "FIXME: Signed In user is neither stored in db nor admin. Contact the admin.",
+            );
         }
     }, [authenticated, users]);
 
@@ -312,7 +326,7 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                             >
                                 <option></option>
                                 {users.map((u: UserType) => (
-                                    <option value={u.id}>{u.name}</option>
+                                    <option value={u.ID}>{u.Name}</option>
                                 ))}
                             </select>
                             {league !== undefined ? (
@@ -321,7 +335,13 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                                 </label>
                             ) : (
                                 <label className="form-label">
-                                    <button className="btn">Create</button>
+                                    {authenticated.Role == "admin" ? (
+                                        <button className="btn">Create</button>
+                                    ) : (
+                                        <button className="btn" disabled>
+                                            Create
+                                        </button>
+                                    )}
                                 </label>
                             )}
                         </div>

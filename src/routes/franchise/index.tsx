@@ -32,22 +32,19 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                 type: FormEnum.Set,
                 payload: { name: "LeagueID", value: league.ID },
             });
-        } else {
-            console.error("League is undefined.");
         }
-        console.log(league);
-    }, [authenticated]);
+    }, [authenticated, league, users]);
 
     const handleChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
         if (currentTarget.name == "OwnerId") {
-            const userName = users.find((u) => u.id === currentTarget.value);
+            const userName = users.find((u) => u.ID === currentTarget.value);
             setFormData({
                 type: FormEnum.Set,
                 payload: {
                     name: "OwnerName",
-                    value: userName !== undefined ? userName.name : "",
+                    value: userName !== undefined ? userName.Name : "",
                 },
             });
         }
@@ -55,16 +52,13 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
             type: FormEnum.Set,
             payload: { name: currentTarget.name, value: currentTarget.value },
         });
-        console.log(formData);
     };
 
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
-        console.log(formValidator(formData));
         if (formValidator(formData)) {
             post(`${process.env.BASE_URL_FANTASY_SVC}/franchise`, formData).then((data) => {
                 if (data.status == 201) {
-                    console.log(data);
                     console.log(`API response code ${data.status}`);
                 } else {
                     // TODO: handle error api response
@@ -72,7 +66,7 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                 }
             });
         } else {
-            console.error("One Form field is empty");
+            console.error("One or more franchise form entries are empty!");
         }
     };
 
@@ -122,7 +116,7 @@ const Franchise: FunctionalComponent<{ users: UserType[]; league: LeagueType | u
                         >
                             <option></option>
                             {users.map((u) => (
-                                <option value={u.id}>{u.name}</option>
+                                <option value={u.ID}>{u.Name}</option>
                             ))}
                         </select>
                         <label className="form-label">

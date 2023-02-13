@@ -24,7 +24,6 @@ const AdminBoard: FunctionalComponent = () => {
         // get all users
         get(`${process.env.BASE_URL_AUTH_SVC}/user/all`)
             .then((data) => {
-                console.log(data);
                 if (data.status == 401) {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
@@ -37,17 +36,15 @@ const AdminBoard: FunctionalComponent = () => {
         // get all leagues (array only contains lakelandcup)
         get(`${process.env.BASE_URL_FANTASY_SVC}/leagues`)
             .then((data) => {
-                console.log(data.result[0]);
-                if (
-                    data.status == 401 ||
-                    data.result === undefined ||
-                    data.result == null ||
-                    data.result.length == 0
-                ) {
+                if (data.status == 401) {
                     // TODO: handle error api response
-                    console.log(`API response code ${data.status}`);
+                    console.log(`GET Leagues: API response code ${data.status}`);
                 } else {
-                    setLeague(data.result[0]);
+                    const l = data.result;
+                    // if a league exisits, set state accordingly
+                    if (l !== undefined && l !== null) {
+                        setLeague(data.result[0]);
+                    }
                 }
             })
             .catch((err) => console.log(err));
@@ -58,7 +55,7 @@ const AdminBoard: FunctionalComponent = () => {
                 .then((data) => {
                     if (data.status == 401 || data.result.length == 0) {
                         // TODO: handle error api response
-                        console.log(`API response code ${data.status}`);
+                        console.log(`GET Franchises: API response code ${data.status}`);
                     } else {
                         setFranchises(data.result);
                     }
@@ -72,7 +69,7 @@ const AdminBoard: FunctionalComponent = () => {
         // sign out
         get(`${process.env.BASE_URL_AUTH_SVC}/signout`).then((data) => {
             if (data.status == 200) {
-                setAuthenticated({ id: "", state: false });
+                setAuthenticated({ ID: "", State: false, Role: "" });
             } else {
                 // TODO: handle error api response
                 console.log(`API response code ${data.status}`);

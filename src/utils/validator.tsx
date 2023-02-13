@@ -1,6 +1,6 @@
 import { FranchiseFormType, LeagueFormType } from "./reducers";
-
-type FormType = FranchiseFormType | LeagueFormType;
+import { DraftFormType } from "../routes/draft";
+type FormType = FranchiseFormType | LeagueFormType | DraftFormType;
 
 const formValidator = (form: FormType) => {
     for (let key in form) {
@@ -13,11 +13,3 @@ const formValidator = (form: FormType) => {
 };
 
 export default formValidator;
-/*
-formData.LeagueID !== "" &&
-    formData.Name !== "" &&
-    formData.FoundationYear !== "" &&
-    formData.OwnerName !== "" &&
-    formData.OwnerId !== "";
-export default formValidator;
-*/

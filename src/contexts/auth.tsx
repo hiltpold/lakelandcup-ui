@@ -6,8 +6,9 @@ import { createContext } from "preact";
 import { get } from "../utils/requests";
 
 export type AuthType = {
-    state: boolean;
-    id: string;
+    ID: string;
+    State: boolean;
+    Role: string;
 };
 
 export interface IAuthContext {
@@ -18,7 +19,7 @@ export interface IAuthContext {
 export const AuthContext = createContext({} as IAuthContext);
 
 const Auth: FunctionalComponent = ({ children }) => {
-    const [authenticated, setAuthenticated] = useState({ id: "", state: false });
+    const [authenticated, setAuthenticated] = useState({ ID: "", State: false, Role: "user" });
 
     useEffect(() => {
         console.log("<AuthContext>");
@@ -27,9 +28,9 @@ const Auth: FunctionalComponent = ({ children }) => {
                 if (data.status == 401) {
                     // TODO: handle error api response
                     console.log(`API response code ${data.status}`);
-                    setAuthenticated({ id: "", state: false });
+                    setAuthenticated({ ID: "", State: false, Role: "" });
                 } else {
-                    setAuthenticated({ id: data.userId, state: true });
+                    setAuthenticated({ ID: data.userId, State: true, Role: data.role });
                 }
             })
             .catch((err) => console.log(err));

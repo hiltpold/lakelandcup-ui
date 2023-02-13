@@ -6,16 +6,12 @@ import style from "./style.module.css";
 import formReducer, { FormEnum, LeagueFormType } from "../../utils/reducers";
 import Grid from "../../components/grid";
 import { UserType, LeagueType } from "../../components/app";
-import { AgGridReact } from "ag-grid-react";
 import post, { get } from "../../utils/requests";
-import { GridOptions, RowSelectedEvent, ColDef, GridReadyEvent } from "ag-grid-community";
+import { GridOptions, ColDef } from "ag-grid-community";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { KeyboardEvent } from "react";
-import { setServers } from "dns";
-import test from "node:test";
-import { stringify } from "querystring";
+import formValidator from "../../utils/validator";
 
 const draftYear = ["2017", "2018", "2019", "2020", "2021", "2022", "2023"];
 const draftRounds = ["1", "2"];
@@ -88,7 +84,7 @@ type Franchise = {
     Name: string;
 };
 
-type Draft = {
+export type DraftFormType = {
     draftPick: string | DraftPick;
     prospectID: string;
     franchiseID: string;
@@ -107,7 +103,7 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     league,
 }) => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
-    const [formData, setFormData] = useReducer(formReducer<Draft>, initDraftPick);
+    const [formData, setFormData] = useReducer(formReducer<DraftFormType>, initDraftPick);
     const [search, setSearch] = useState<string>("");
     const [franchises, setFranchises] = useState<Franchise[]>([]);
     const [draftPicks, setDraftPicks] = useState<DraftPick[]>([]);
@@ -173,27 +169,17 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
         }
     };
 
-    const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement | HTMLButtonElement, Event>) => {
-        event.preventDefault();
-        if (
-            formData.prospectID !== undefined &&
-            formData.prospectID !== null &&
-            formData.prospectID !== "" &&
-            formData.franchiseID !== undefined &&
-            formData.franchiseID !== null &&
-            formData.franchiseID !== "" &&
-            formData.prospectID !== undefined &&
-            formData.prospectID !== null &&
-            formData.prospectID !== "" &&
-            formData.draftPick !== undefined &&
-            formData.draftPick !== null &&
-            formData.draftPick !== ""
-        ) {
+    const handleDraft = ({ currentTarget }: JSX.TargetedEvent<HTMLFormElement, Event>) => {
+        currentTarget.preventDefault();
+        if (formValidator(formData)) {
             if (typeof formData.draftPick === "string") {
                 formData.draftPick = JSON.parse(formData.draftPick);
             }
             // post data
-            if (event.submitter.textContent == "Draft") {
+            if (
+                currentTarget.submitter !== null &&
+                currentTarget.submitter.textContent == "Draft"
+            ) {
                 post(`${process.env.BASE_URL_FANTASY_SVC}/prospect/draft`, formData).then(
                     (data) => {
                         if (data.status == 201) {
@@ -205,7 +191,10 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                         }
                     },
                 );
-            } else if (event.submitter.textContent == "Undraft") {
+            } else if (
+                currentTarget.submitter !== null &&
+                currentTarget.submitter.textContent == "Undraft"
+            ) {
                 post(`${process.env.BASE_URL_FANTASY_SVC}/prospect/undraft`, formData).then(
                     (data) => {
                         if (data.status == 201) {

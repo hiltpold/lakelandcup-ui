@@ -17,11 +17,11 @@ type ActionMap<M extends { [index: string]: any }> = {
 export type LeagueFormType = {
     Name: string;
     FoundationYear: string;
-    MaxFranchises: bigint | null;
-    MaxProspects: bigint | null;
-    DraftRightsGoalie: bigint | null;
-    DraftRightsSkater: bigint | null;
-    DraftRounds: bigint | null;
+    MaxFranchises: number | null;
+    MaxProspects: number | null;
+    DraftRightsGoalie: number | null;
+    DraftRightsSkater: number | null;
+    DraftRounds: number | null;
     AdminID: string;
     Admin: string;
     CommissionerID: string;
