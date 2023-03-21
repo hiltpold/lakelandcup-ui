@@ -1,6 +1,7 @@
 import { FranchiseFormType, LeagueFormType } from "./reducers";
 import { DraftFormType } from "../routes/draft";
-type FormType = FranchiseFormType | LeagueFormType | DraftFormType;
+import { DraftLottery } from "../routes/league";
+type FormType = FranchiseFormType | LeagueFormType | DraftFormType | DraftLottery;
 
 const formValidator = (form: FormType) => {
     for (let key in form) {

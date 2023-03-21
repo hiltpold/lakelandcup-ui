@@ -11,7 +11,7 @@ import formValidator from "../../utils/validator";
 
 const isInteger = (num: string | number) => /^-?[0-9]+$/.test(num + "");
 
-type DraftLottery = {
+export type DraftLottery = {
     Franchise: string;
     FranchiseID: string;
     Owner: string;
@@ -99,7 +99,8 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
             type: FormEnum.Set,
             payload: {
                 name: name,
-                value: isInteger(value) ? parseInt(value) : value,
+                value:
+                    isInteger(value) && currentTarget.type === "number" ? parseInt(value) : value,
             },
         });
     };
@@ -164,7 +165,27 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
 
     const handleUpdateLottery = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
-        console.log(formDataLottery);
+        if (league !== undefined) {
+            const update = { LeagueID: league.ID, Picks: formDataLottery };
+            // send update to fantasy backend
+            const isTrue = formDataLottery.map((d) => formValidator(d)).every((v) => v === true);
+            console.log(isTrue);
+            console.log(update);
+            if (isTrue) {
+                post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/picks`, update).then(
+                    (data) => {
+                        if (data.status == 201) {
+                            console.log(`API response code ${data.status}`);
+                        } else {
+                            // TODO: handle error api response
+                            console.log(`API response code ${data.code}`);
+                        }
+                    },
+                );
+            } else {
+                console.error("Please select a year!");
+            }
+        }
     };
 
     const handleChangeDraftYear = ({
@@ -192,11 +213,6 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
 
     useEffect(() => {
         console.log("<League>");
-        console.log("--------------");
-        console.log(users);
-        console.log(league);
-        console.log(authenticated);
-        console.log("--------------");
         if (league !== undefined && league.Franchises !== undefined) {
             const rowData = league.Franchises.map((f) => {
                 return {
@@ -224,10 +240,6 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                 type: FormEnum.Set,
                 payload: { name: "AdminID", value: adminUser.ID },
             });
-        } else {
-            console.error(
-                "FIXME: Signed In user is neither stored in db nor admin. Contact the admin.",
-            );
         }
     }, [authenticated, users]);
 

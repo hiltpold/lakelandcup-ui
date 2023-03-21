@@ -55,10 +55,10 @@ type ProspectView = {
 };
 
 type Trade = {
-    fromFranchiseID: string;
-    picks: DraftPick[];
-    prospects: string[];
-    toFranchiseID: string;
+    FromFranchiseID: string;
+    Picks: DraftPick[];
+    Prospects: string[];
+    ToFranchiseID: string;
 };
 
 const columnDefsProspect = [
@@ -96,10 +96,10 @@ const gridOptionsPicks = {
 } as GridOptions;
 
 const initialTrade = {
-    fromFranchiseID: "",
-    picks: [],
-    prospects: [],
-    toFranchiseID: "",
+    FromFranchiseID: "",
+    ToFranchiseID: "",
+    Picks: [],
+    Prospects: [],
 };
 
 const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
@@ -129,7 +129,6 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     const handleFromFranchiseChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLSelectElement, Event>) => {
-        //
         // generate picks
         const fID = currentTarget.value;
         const picks = possibleFuturePicks.get(fID)!.map((p) => {
