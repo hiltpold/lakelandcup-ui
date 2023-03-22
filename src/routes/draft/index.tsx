@@ -12,72 +12,16 @@ import { GridOptions, ColDef } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import formValidator from "../../utils/validator";
-
-const draftYear = ["2017", "2018", "2019", "2020", "2021", "2022", "2023"];
-const draftRounds = ["1", "2"];
-const pickInRound = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"];
-
-type DraftPick = {
-    DraftYear: string;
-    DraftRound: string;
-    DraftPickInRound: string;
-    DraftPickOverall: string;
-};
-type Prospect = {
-    ID: string;
-    FullName: string;
-    NhlTeam: string;
-    Birthdate: string;
-    LeagueID: string;
-    FranchiseID: string;
-    Pick: {
-        ID: string;
-        DraftYear: string;
-        DraftRound: string;
-        DraftPickInRound: string;
-        DraftPickOverall: string;
-        ProspectID: string;
-    };
-};
-
-type ProspectView = {
-    ID: string;
-    FullName: string;
-    Franchise: string;
-    NhlTeam: string;
-    Birthdate: string;
-    LeagueID: string;
-    FranchiseID: string;
-};
-
-const columnDefsProspect = [
-    { field: "FullName" },
-    { field: "Franchise" },
-    { field: "NhlTeam" },
-    // { field: "NhlDraftRound" },
-    // { field: "NhlPickInRound" },
-    // { field: "NhlDraftPickOverall" },
-    { field: "Birthdate" },
-    // { field: "PositionCode" },
-    // { field: "Weight" },
-    // { field: "Height" },
-    { field: "ID", hide: true },
-    { field: "LeagueID", hide: true },
-    { field: "FranchiseID", hide: true },
-];
-
-const gridOptionsPropspectInit = {
-    columnDefs: columnDefsProspect,
-    rowData: [],
-    rowHeight: 35,
-    onSelectionChanged: undefined,
-};
-
-type GridOptionsProspects = {
-    columnDefs: ColDef;
-    rowData: Prospect[];
-    rowHeight: number;
-};
+import {
+    gridOptionsPropspects,
+    gridOptionsPicks,
+    Prospect,
+    ProspectView,
+    DraftPick,
+    DraftPickView,
+    columnDefsPicks,
+    columnDefsProspect,
+} from "../trade";
 
 type Franchise = {
     ID: string;
@@ -91,7 +35,7 @@ export type DraftFormType = {
     leagueID: string;
 };
 
-const initDraftPick = {
+const initDraftForm = {
     draftPick: "",
     prospectID: "",
     franchiseID: "",
@@ -103,74 +47,160 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     league,
 }) => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
-    const [formData, setFormData] = useReducer(formReducer<DraftFormType>, initDraftPick);
+    const [formData, setFormData] = useReducer(formReducer<DraftFormType>, initDraftForm);
     const [search, setSearch] = useState<string>("");
-    const [franchises, setFranchises] = useState<Franchise[]>([]);
-    const [draftPicks, setDraftPicks] = useState<DraftPick[]>([]);
+    const [year, setYear] = useState<string>("");
 
-    const [gridOptions, setGridOptions] = useState<GridOptions>(gridOptionsPropspectInit);
+    const [gridOptions, setGridOptions] = useState<GridOptions>(gridOptionsPropspects);
+    const [picksGridOptions, setPicksGridOptions] = useState<GridOptions>({
+        ...gridOptionsPicks,
+        rowSelection: "single",
+    });
 
     const onSelectionChanged = (params: any) => {
         const selectedRow = params.api.getSelectedRows()[0];
-        if (selectedRow) {
-            setFormData({
-                type: FormEnum.Set,
-                payload: {
-                    name: "prospectID",
-                    value: selectedRow.ID,
-                },
-            });
-        } else {
-            setFormData({
-                type: FormEnum.Set,
-                payload: {
-                    name: "prospectID",
-                    value: "",
-                },
-            });
-        }
+        // TODO
     };
 
-    const handleChange = ({
-        currentTarget,
-    }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
-        if (currentTarget.name == "franchiseID") {
-            setFormData({
-                type: FormEnum.Set,
-                payload: {
-                    name: "franchiseID",
-                    value: currentTarget.value,
-                },
-            });
-        } else if (currentTarget.name == "draftYear") {
-            const draftPicksPerRound = draftRounds.flatMap((dr) => {
-                const picks: DraftPick[] = pickInRound.map((pid) => {
+    // Picks
+
+    const displayPicksGrid = (leagueID: string, year: string) => {
+        get(
+            `${process.env.BASE_URL_FANTASY_SVC}/league/${leagueID}/picks/${encodeURIComponent(
+                year,
+            )}`,
+        ).then((data) => {
+            if (data.picks && data.picks.length >= 0) {
+                const picks = data.picks.map((p: DraftPick) => {
                     return {
-                        DraftYear: currentTarget.value,
-                        DraftRound: dr,
-                        DraftPickInRound: pid,
-                        DraftPickOverall: (
-                            (parseInt(dr) - 1) * pickInRound.length +
-                            parseInt(pid)
-                        ).toString(),
+                        Year: p.DraftYear,
+                        Round: p.DraftRound,
+                        PickInRound: p.DraftPickInRound,
+                        PickOverall: p.DraftPickOverall,
+                        Owner: p.OwnerName,
+                        OwnerID: p.OwnerID,
+                        LastOwner: p.LastOwnerName,
+                        LastOwnerID: p.LastOwnerID,
+                        Origin: p.OriginName,
+                        OriginID: p.OriginID,
                     };
                 });
-                return picks;
-            });
-            setDraftPicks(draftPicksPerRound);
+                setPicksGridOptions({ ...picksGridOptions, rowData: picks });
+            } else {
+                setPicksGridOptions({ ...picksGridOptions, rowData: [] });
+            }
+        });
+    };
+
+    const handleDraftPicksOnKeyUp = (e: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
+        setYear(e.currentTarget.value);
+        if (
+            e.key == "Enter" &&
+            year.length == 4 &&
+            parseInt(year) >= 2000 &&
+            parseInt(year) <= 2099 &&
+            league !== undefined
+        ) {
+            displayPicksGrid(league.ID, year);
         } else {
-            setFormData({
-                type: FormEnum.Set,
-                payload: {
-                    name: currentTarget.name,
-                    value: currentTarget.value,
-                },
-            });
+            console.log(`If you entered a number between 2000 and 2099, press enter.`);
         }
     };
 
-    const handleDraft = ({ currentTarget }: JSX.TargetedEvent<HTMLFormElement, Event>) => {
-        currentTarget.preventDefault();
+    const handleDraftPicksOnClick = (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
+        if (
+            year.length == 4 &&
+            parseInt(year) >= 2000 &&
+            parseInt(year) <= 2099 &&
+            league !== undefined
+        ) {
+            displayPicksGrid(league.ID, year);
+        } else {
+            console.log(`If you entered a number between 2000 and 2099, press go.`);
+        }
+    };
+
+    // Prospects
+
+    const displayProspectsGrid = () => {
+        get(`${process.env.BASE_URL_FANTASY_SVC}/prospect/${encodeURIComponent(search)}`)
+            .then((data) => {
+                if (data.status != 200) {
+                    // TODO: handle error api response
+                    console.log(`API response code ${data.status}`);
+                } else {
+                    if (data.prospects && data.prospects.length >= 0) {
+                        const prospects = data.prospects.map((p: Prospect) => {
+                            return {
+                                ID: p.ID,
+                                FullName: p.FullName,
+                                NhlTeam: p.NhlTeam,
+                                Birthdate: p.Birthdate,
+                                FranchiseID: p.FranchiseID,
+                                LeagueID: p.LeagueID,
+                                Pick: {
+                                    ID: p.Pick.ID,
+                                    DraftYear: p.Pick.DraftYear,
+                                    DraftRound: p.Pick.DraftRound,
+                                    DraftPickInRound: p.Pick.DraftPickInRound,
+                                    DraftPickOverall: p.Pick.DraftPickOverall,
+                                    ProspectID: p.Pick.ProspectID,
+                                },
+                            };
+                        });
+                        const prospectsView = prospects.map(async (p: Prospect) => {
+                            let tmp: ProspectView = {
+                                FullName: p.FullName,
+                                Franchise: "",
+                                Birthdate: p.Birthdate,
+                                NhlTeam: p.NhlTeam,
+                                ID: p.ID,
+                                LeagueID: p.LeagueID,
+                                FranchiseID: p.FranchiseID,
+                            };
+                            const fID = p.FranchiseID;
+                            if (fID !== undefined && fID !== null && fID !== "") {
+                                const response = await get(
+                                    `${process.env.BASE_URL_FANTASY_SVC}/franchise/${fID}`,
+                                );
+                                const franchise: Franchise = response.result;
+                                tmp.Franchise = franchise.Name;
+                            }
+                            return tmp;
+                        });
+                        Promise.all(prospectsView).then((pv) => {
+                            setGridOptions({ ...gridOptions, rowData: pv });
+                        });
+                    } else {
+                        setGridOptions({ ...gridOptions, rowData: [] });
+                    }
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
+
+    const handleProspectsOnKeyUp = (e: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        if (e.key == "Enter" && search.length > 0) {
+            displayProspectsGrid();
+        } else {
+            setSearch(e.currentTarget.value);
+        }
+    };
+
+    const handleProspectsOnClick = (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
+        if (search.length > 0) {
+            displayProspectsGrid();
+        }
+    };
+
+    // Draft
+
+    const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
+        event.preventDefault();
+        /*
         if (formValidator(formData)) {
             if (typeof formData.draftPick === "string") {
                 formData.draftPick = JSON.parse(formData.draftPick);
@@ -210,88 +240,13 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                 console.log(formData);
             }
         }
-    };
-
-    const searchProspects = (e: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" && search.length > 0) {
-            setSearch(e.currentTarget.value);
-            get(`${process.env.BASE_URL_FANTASY_SVC}/prospect/${encodeURIComponent(search)}`)
-                .then((data) => {
-                    if (data.status != 200) {
-                        // TODO: handle error api response
-                        console.log(`API response code ${data.status}`);
-                    } else {
-                        if (data.prospects && data.prospects.length >= 0) {
-                            const prospects = data.prospects.map((p: Prospect) => {
-                                return {
-                                    ID: p.ID,
-                                    FullName: p.FullName,
-                                    NhlTeam: p.NhlTeam,
-                                    Birthdate: p.Birthdate,
-                                    FranchiseID: p.FranchiseID,
-                                    LeagueID: p.LeagueID,
-                                    Pick: {
-                                        ID: p.Pick.ID,
-                                        DraftYear: p.Pick.DraftYear,
-                                        DraftRound: p.Pick.DraftRound,
-                                        DraftPickInRound: p.Pick.DraftPickInRound,
-                                        DraftPickOverall: p.Pick.DraftPickOverall,
-                                        ProspectID: p.Pick.ProspectID,
-                                    },
-                                };
-                            });
-                            const prospectsView = prospects.map(async (p: Prospect) => {
-                                let tmp: ProspectView = {
-                                    FullName: p.FullName,
-                                    Franchise: "",
-                                    Birthdate: p.Birthdate,
-                                    NhlTeam: p.NhlTeam,
-                                    ID: p.ID,
-                                    LeagueID: p.LeagueID,
-                                    FranchiseID: p.FranchiseID,
-                                };
-                                const fID = p.FranchiseID;
-                                if (fID !== undefined && fID !== null && fID !== "") {
-                                    const response = await get(
-                                        `${process.env.BASE_URL_FANTASY_SVC}/franchise/${fID}`,
-                                    );
-                                    const franchise: Franchise = response.result;
-                                    tmp.Franchise = franchise.Name;
-                                }
-                                return tmp;
-                            });
-                            Promise.all(prospectsView).then((pv) => {
-                                setGridOptions({ ...gridOptions, rowData: pv });
-                            });
-                        } else {
-                            setGridOptions({ ...gridOptions, rowData: [] });
-                        }
-                    }
-                })
-                .catch((err) => console.log(err));
-        } else {
-            setSearch(e.currentTarget.value);
-        }
+        */
     };
 
     useEffect(() => {
         console.log("<Prospects>");
         setGridOptions({ ...gridOptions, onSelectionChanged: onSelectionChanged });
         if (league !== undefined && league !== null) {
-            get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchises`).then(
-                (data) => {
-                    if (data.result !== undefined) {
-                        setFranchises(
-                            data.result.map((f: Franchise) => {
-                                return {
-                                    ID: f.ID,
-                                    Name: f.Name,
-                                };
-                            }),
-                        );
-                    }
-                },
-            );
             setFormData({
                 type: FormEnum.Set,
                 payload: {
@@ -300,65 +255,53 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                 },
             });
         }
-    }, [authenticated, search]);
+    }, [authenticated]);
 
     return (
         <div className={`columns`}>
             <div
-                className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.prospects_picks}`}
+                className={`column col-6 col-mx-auto col-xs-12 col-sm-12 col-md-12 col-lg-10 col-xl-10 ${style.prospects_picks}`}
             >
                 <form onSubmit={handleDraft}>
-                    <div className="form-group">
-                        <label className={`form-label ${style.label}`}>Draft Year</label>
-                        <select
-                            class="form-select"
-                            name="draftYear"
-                            type="text"
-                            onChange={handleChange}
-                        >
-                            <option value="">{""}</option>
-                            {draftYear.map((dy) => (
-                                <option value={dy}>{dy}</option>
-                            ))}
-                        </select>
-                        <label className={`form-label ${style.label}`}>Franchise</label>
-                        <select
-                            class="form-select"
-                            name="franchiseID"
-                            type="text"
-                            onChange={handleChange}
-                        >
-                            <option value="">{""}</option>
-                            {franchises.map((f) => (
-                                <option value={f.ID}>{f.Name}</option>
-                            ))}
-                        </select>
-                        <label className={`form-label ${style.label}`}>Draft Pick</label>
-                        <select
-                            class="form-select"
-                            name="draftPick"
-                            type="text"
-                            onChange={handleChange}
-                            disabled={false}
-                        >
-                            <option value="">{""}</option>
-                            {draftPicks.map((dr) => (
-                                <option
-                                    value={JSON.stringify(dr)}
-                                >{`Round: ${dr.DraftRound}  |  Pick ${dr.DraftPickInRound}  |  Pick Overall: ${dr.DraftPickOverall}`}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <label className={`form-label ${style.label}`}>Draft Year</label>
                     <div className="form-horizontal">
                         <div className="form-group">
                             <input
-                                className="column col-10 col-xs-10 form-input lakelandcup-input-form"
-                                name="name"
+                                className="column col-10 col-xs-10 form-input"
+                                type="text"
+                                placeholder="draft year"
+                                onKeyUp={handleDraftPicksOnKeyUp}
+                            />
+                            <button
+                                className="column col-2 col-xs-2 btn"
+                                onClick={handleDraftPicksOnClick}
+                            >
+                                go
+                            </button>
+                        </div>
+                    </div>
+
+                    {picksGridOptions.rowData === null || picksGridOptions.rowData === undefined ? (
+                        <div></div>
+                    ) : (
+                        <Grid gridOptions={picksGridOptions} />
+                    )}
+                    <div class="divider"></div>
+
+                    <div className="form-horizontal">
+                        <div className="form-group">
+                            <input
+                                className="column col-10 col-xs-10 form-input"
                                 type="text"
                                 placeholder="search prospects"
-                                onKeyUp={searchProspects}
+                                onKeyUp={handleProspectsOnKeyUp}
                             />
-                            <button className="column col-2 col-xs-2 btn">go</button>
+                            <button
+                                className="column col-2 col-xs-2 btn"
+                                onClick={handleProspectsOnClick}
+                            >
+                                go
+                            </button>
                         </div>
                     </div>
                     {gridOptions.rowData === null || gridOptions.rowData === undefined ? (
@@ -366,6 +309,7 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                     ) : (
                         <Grid gridOptions={gridOptions} />
                     )}
+                    <div class="divider"></div>
                     <button className="btn">Draft</button>
                     <button className="btn">Undraft</button>
                 </form>

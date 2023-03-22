@@ -169,8 +169,6 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
             const update = { LeagueID: league.ID, Picks: formDataLottery };
             // send update to fantasy backend
             const isTrue = formDataLottery.map((d) => formValidator(d)).every((v) => v === true);
-            console.log(isTrue);
-            console.log(update);
             if (isTrue) {
                 post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/picks`, update).then(
                     (data) => {
@@ -178,7 +176,8 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                             console.log(`API response code ${data.status}`);
                         } else {
                             // TODO: handle error api response
-                            console.log(`API response code ${data.code}`);
+                            console.log(`API response code ${data.status}`);
+                            console.log(data.error);
                         }
                     },
                 );
@@ -372,7 +371,7 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                         <input
                             className="form-input lakelandcup-input-form"
                             type="text"
-                            placeholder="foundation year"
+                            placeholder="draft year"
                             onChange={handleChangeDraftYear}
                         />
                     </label>

@@ -11,23 +11,39 @@ import { GridOptions } from "ag-grid-community";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-
-type Franchise = {
+export type Franchise = {
     ID: string;
     Name: string;
 };
-
-type DraftPick = {
-    draftYear: string;
-    draftRound: string;
-    draftPickInRound: string;
-    draftPickOverall: string;
-    owner: Franchise;
-    lastOwner: Franchise;
-    origin: Franchise;
+export type DraftPick = {
+    ID: string;
+    DraftYear: string;
+    DraftRound: string;
+    DraftPickInRound: string;
+    DraftPickOverall: string;
+    OwnerName: string;
+    OwnerID: string;
+    LastOwnerName: string;
+    LastOwnerID: string;
+    OriginName: string;
+    OriginID: string;
 };
 
-type Prospect = {
+export type DraftPickView = {
+    ID: string;
+    Year: string;
+    Round: string;
+    PickInRound: string;
+    PickOverall: string;
+    Owner: string;
+    OwnerID: string;
+    LastOwner: string;
+    LastOwnerID: string;
+    Origin: string;
+    OriginID: string;
+};
+
+export type Prospect = {
     ID: string;
     FullName: string;
     NhlTeam: string;
@@ -44,7 +60,7 @@ type Prospect = {
     };
 };
 
-type ProspectView = {
+export type ProspectView = {
     ID: string;
     FullName: string;
     Franchise: string;
@@ -54,23 +70,26 @@ type ProspectView = {
     FranchiseID: string;
 };
 
-type Trade = {
+export type Trade = {
     FromFranchiseID: string;
     Picks: DraftPick[];
     Prospects: string[];
     ToFranchiseID: string;
 };
 
-const columnDefsProspect = [
+export const columnDefsProspect = [
     { field: "FullName" },
     { field: "Franchise" },
     { field: "NhlTeam" },
     { field: "Birthdate" },
 ];
 
-const columnDefsPicks = [
-    { field: "DraftYear" },
+export const columnDefsPicks = [
+    { field: "ID", hide: true },
+    { field: "Year" },
     { field: "Round" },
+    { field: "PickInRound" },
+    { field: "PickOverall" },
     { field: "Owner" },
     { field: "LastOwner" },
     { field: "Origin" },
@@ -79,7 +98,7 @@ const columnDefsPicks = [
     { field: "LastOwnerID", hide: true },
 ];
 
-const gridOptionsPropspects = {
+export const gridOptionsPropspects = {
     columnDefs: columnDefsProspect,
     rowData: [],
     rowHeight: 35,
@@ -87,7 +106,7 @@ const gridOptionsPropspects = {
     rowSelection: "multiple",
 } as GridOptions;
 
-const gridOptionsPicks = {
+export const gridOptionsPicks = {
     columnDefs: columnDefsPicks,
     rowData: [],
     rowHeight: 35,
@@ -133,14 +152,14 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
         const fID = currentTarget.value;
         const picks = possibleFuturePicks.get(fID)!.map((p) => {
             return {
-                DraftYear: p.draftYear,
-                Round: p.draftRound,
-                Owner: p.owner.Name,
-                OwnerID: p.owner.ID,
-                LastOwner: p.lastOwner.Name,
-                LastOwnerID: p.lastOwner.ID,
-                Origin: p.origin.Name,
-                OriginID: p.origin.ID,
+                DraftYear: p.DraftYear,
+                Round: p.DraftRound,
+                Owner: p.OwnerName,
+                OwnerID: p.OwnerID,
+                LastOwner: p.LastOwnerName,
+                LastOwnerID: p.LastOwnerID,
+                Origin: p.OriginName,
+                OriginID: p.OriginID,
             };
         });
         console.log(picks);
@@ -192,15 +211,18 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
             futureYears.forEach((y) => {
                 league.Franchises.forEach((f) => {
                     const p: DraftPick[] = draftRounds.map((r) => {
-                        const franchise: Franchise = { ID: f.ID, Name: f.Name };
                         const res: DraftPick = {
-                            draftYear: y.toString(),
-                            draftRound: r.toString(),
-                            draftPickInRound: "",
-                            draftPickOverall: "",
-                            owner: franchise,
-                            origin: franchise,
-                            lastOwner: franchise,
+                            ID: "",
+                            DraftYear: y.toString(),
+                            DraftRound: r.toString(),
+                            DraftPickInRound: "",
+                            DraftPickOverall: "",
+                            OwnerName: "",
+                            OwnerID: "",
+                            LastOwnerName: "",
+                            LastOwnerID: "",
+                            OriginName: "",
+                            OriginID: "",
                         };
                         return res;
                     });
