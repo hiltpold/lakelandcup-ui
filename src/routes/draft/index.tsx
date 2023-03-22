@@ -29,17 +29,17 @@ type Franchise = {
 };
 
 export type DraftFormType = {
-    draftPick: string | DraftPick;
-    prospectID: string;
-    franchiseID: string;
-    leagueID: string;
+    PickID: string;
+    ProspectID: string;
+    FranchiseID: string;
+    LeagueID: string;
 };
 
 const initDraftForm = {
-    draftPick: "",
-    prospectID: "",
-    franchiseID: "",
-    leagueID: "",
+    LeagueID: "",
+    FranchiseID: "",
+    ProspectID: "",
+    PickID: "",
 };
 
 const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
@@ -51,15 +51,35 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     const [search, setSearch] = useState<string>("");
     const [year, setYear] = useState<string>("");
 
-    const [gridOptions, setGridOptions] = useState<GridOptions>(gridOptionsPropspects);
+    const [prospectsGridOptions, setProspectsGridOptions] =
+        useState<GridOptions>(gridOptionsPropspects);
     const [picksGridOptions, setPicksGridOptions] = useState<GridOptions>({
         ...gridOptionsPicks,
         rowSelection: "single",
     });
 
-    const onSelectionChanged = (params: any) => {
-        const selectedRow = params.api.getSelectedRows()[0];
-        // TODO
+    const onSelectionChangedPicks = (params: any) => {
+        const selectedPick = params.api.getSelectedRows()[0] as DraftPick;
+        if (selectedPick !== null && selectedPick !== undefined) {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "PickID", value: selectedPick.ID },
+            });
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "FranchiseID", value: selectedPick.OwnerID },
+            });
+        }
+    };
+
+    const onSelectionChangedProspects = (params: any) => {
+        const selectedProspect = params.api.getSelectedRows()[0] as DraftPick;
+        if (selectedProspect !== null && selectedProspect !== undefined) {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "ProspectID", value: selectedProspect.ID },
+            });
+        }
     };
 
     // Picks
@@ -73,6 +93,7 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
             if (data.picks && data.picks.length >= 0) {
                 const picks = data.picks.map((p: DraftPick) => {
                     return {
+                        ID: p.ID,
                         Year: p.DraftYear,
                         Round: p.DraftRound,
                         PickInRound: p.DraftPickInRound,
@@ -169,10 +190,10 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                             return tmp;
                         });
                         Promise.all(prospectsView).then((pv) => {
-                            setGridOptions({ ...gridOptions, rowData: pv });
+                            setProspectsGridOptions({ ...prospectsGridOptions, rowData: pv });
                         });
                     } else {
-                        setGridOptions({ ...gridOptions, rowData: [] });
+                        setProspectsGridOptions({ ...prospectsGridOptions, rowData: [] });
                     }
                 }
             })
@@ -200,6 +221,9 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
 
     const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
+        console.log(formData);
+        if (formValidator(formData)) {
+        }
         /*
         if (formValidator(formData)) {
             if (typeof formData.draftPick === "string") {
@@ -245,12 +269,22 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
 
     useEffect(() => {
         console.log("<Prospects>");
-        setGridOptions({ ...gridOptions, onSelectionChanged: onSelectionChanged });
+        // set handlers for AgGrid
+        setPicksGridOptions({
+            ...picksGridOptions,
+            onSelectionChanged: onSelectionChangedPicks,
+        });
+
+        setProspectsGridOptions({
+            ...prospectsGridOptions,
+            onSelectionChanged: onSelectionChangedProspects,
+        });
+
         if (league !== undefined && league !== null) {
             setFormData({
                 type: FormEnum.Set,
                 payload: {
-                    name: "leagueID",
+                    name: "LeagueID",
                     value: league.ID,
                 },
             });
@@ -304,10 +338,11 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                             </button>
                         </div>
                     </div>
-                    {gridOptions.rowData === null || gridOptions.rowData === undefined ? (
+                    {prospectsGridOptions.rowData === null ||
+                    prospectsGridOptions.rowData === undefined ? (
                         <div></div>
                     ) : (
-                        <Grid gridOptions={gridOptions} />
+                        <Grid gridOptions={prospectsGridOptions} />
                     )}
                     <div class="divider"></div>
                     <button className="btn">Draft</button>

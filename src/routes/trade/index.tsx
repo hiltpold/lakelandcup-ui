@@ -3,12 +3,12 @@ import { FunctionComponent } from "preact/compat";
 import { useContext, useEffect, useState, useReducer } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
 import style from "./style.module.css";
-import formReducer from "../../utils/reducers";
 import Grid from "../../components/grid";
 import { UserType, LeagueType } from "../../components/app";
 import post, { get } from "../../utils/requests";
 import { GridOptions } from "ag-grid-community";
 
+import formReducer, { FormEnum } from "../../utils/reducers";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 export type Franchise = {
@@ -136,8 +136,13 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
         useState<GridOptions>(gridOptionsPropspects);
 
     const onSelectionChangedPicks = (params: any) => {
-        const selectedRows = params.api.getSelectedRows();
-        console.log(selectedRows);
+        const selectedPick = params.api.getSelectedRows()[0] as DraftPick;
+        console.log(selectedPick);
+
+        setFormData({
+            type: FormEnum.Set,
+            payload: { name: "PickID", value: selectedPick.ID },
+        });
     };
 
     const onSelectionChangedProspects = (params: any) => {
