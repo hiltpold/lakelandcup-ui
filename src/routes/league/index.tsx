@@ -221,6 +221,7 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                     FranchiseID: f.ID,
                 };
             });
+            console.log(league.Franchises);
             setGridOptionsLottery({
                 ...gridOptionsLottery,
                 rowData: rowData,

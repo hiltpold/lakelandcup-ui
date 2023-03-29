@@ -68,6 +68,7 @@ export type ProspectView = {
     Birthdate: string;
     LeagueID: string;
     FranchiseID: string;
+    PickID: string;
 };
 
 export type Trade = {
@@ -80,6 +81,8 @@ export type Trade = {
 export const columnDefsProspect = [
     { field: "FullName" },
     { field: "Franchise" },
+    { field: "FranchiseID", hide: true },
+    { field: "PickID", hide: true },
     { field: "NhlTeam" },
     { field: "Birthdate" },
 ];
@@ -91,7 +94,7 @@ export const columnDefsPicks = [
     { field: "PickInRound" },
     { field: "PickOverall" },
     { field: "Owner" },
-    { field: "LastOwner" },
+    { field: "LastOwner", hide: true },
     { field: "Origin" },
     { field: "OwnerID", hide: true },
     { field: "OriginID", hide: true },
