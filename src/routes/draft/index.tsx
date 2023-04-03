@@ -69,32 +69,50 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                 type: FormEnum.Set,
                 payload: { name: "FranchiseID", value: selectedPick.OwnerID },
             });
+        } else {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "PickID", value: "" },
+            });
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "FranchiseID", value: "" },
+            });
         }
     };
 
     const onSelectionChangedProspects = (params: any) => {
         const selectedProspect = params.api.getSelectedRows()[0] as ProspectView;
-        console.log(selectedProspect);
         if (selectedProspect !== null && selectedProspect !== undefined) {
             setFormData({
                 type: FormEnum.Set,
                 payload: { name: "ProspectID", value: selectedProspect.ID },
             });
-            if (selectedProspect.PickID !== null || selectedProspect.PickID !== undefined) {
+            if (
+                selectedProspect.PickID !== null &&
+                selectedProspect.PickID !== undefined &&
+                selectedProspect.PickID !== ""
+            ) {
                 setFormData({
                     type: FormEnum.Set,
                     payload: { name: "PickID", value: selectedProspect.PickID },
                 });
             }
             if (
-                selectedProspect.FranchiseID !== null ||
-                selectedProspect.FranchiseID !== undefined
+                selectedProspect.FranchiseID !== null &&
+                selectedProspect.FranchiseID !== undefined &&
+                selectedProspect.FranchiseID !== ""
             ) {
                 setFormData({
                     type: FormEnum.Set,
                     payload: { name: "FranchiseID", value: selectedProspect.FranchiseID },
                 });
             }
+        } else {
+            setFormData({
+                type: FormEnum.Set,
+                payload: { name: "ProspectID", value: "" },
+            });
         }
     };
 
@@ -179,8 +197,7 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                             };
                         });
                         const prospectsView = prospects.map(async (p: Prospect) => {
-                            const pID = p.Pick !== undefined ? p.Pick.ID : "";
-                            console.log(p.Pick);
+                            const pID = p.Pick.ID !== undefined ? p.Pick.ID : "";
                             let tmp: ProspectView = {
                                 FullName: p.FullName,
                                 Franchise: "", //franchise !== undefined ? franchise : "",
@@ -200,7 +217,6 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                                 tmp.Franchise = franchise.Name;
                                 tmp.FranchiseID = fID;
                             }
-                            console.log(tmp);
                             return tmp;
                         });
                         Promise.all(prospectsView).then((pv) => {
@@ -234,22 +250,27 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     // Draft
 
     const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement | HTMLButtonElement, Event>) => {
-        event.preventDefault();
-        console.log(event);
-
         if (formValidator(formData) && league) {
             console.log("Draft");
-            post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/draft`, formData).then(
-                (data) => {
-                    console.log(data);
+            post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/draft`, formData)
+                .then((data) => {
                     if (data.status == 201) {
                         console.log(`API response code ${data.status}`);
                     } else {
                         // TODO: handle error api response
                         console.log(`API response ${data}`);
                     }
-                },
-            );
+                })
+                .catch((error) => console.log(error))
+                .finally(() => {
+                    const selectedPick = picksGridOptions.api!.getSelectedRows();
+                    picksGridOptions.api!.applyTransaction({ remove: selectedPick });
+                    const selectedProspect = prospectsGridOptions.api!.getSelectedRows();
+                    prospectsGridOptions.api!.applyTransaction({ remove: selectedProspect });
+                    //
+                    prospectsGridOptions.api!.deselectAll();
+                    picksGridOptions.api!.deselectAll();
+                });
         } else {
             console.log("select a pick and a prospect");
         }
@@ -258,23 +279,25 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     const handleUndraft = (
         event: JSX.TargetedEvent<HTMLFormElement | HTMLButtonElement, Event>,
     ) => {
-        event.preventDefault();
-
-        console.log(formData);
-
         if (formValidator(formData) && league) {
             console.log("Undraft");
-            post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/undraft`, formData).then(
-                (data) => {
-                    console.log(data);
+            post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/undraft`, formData)
+                .then((data) => {
                     if (data.status == 201) {
-                        console.log(`API response code ${data.status}`);
+                        console.log(`API response ${data}`);
                     } else {
                         // TODO: handle error api response
                         console.log(`API response ${data}`);
                     }
-                },
-            );
+                })
+                .catch((error) => console.log(error))
+                .finally(() => {
+                    const selectedProspect = prospectsGridOptions.api!.getSelectedRows();
+                    prospectsGridOptions.api!.applyTransaction({ remove: selectedProspect });
+                    //
+                    prospectsGridOptions.api!.deselectAll();
+                    picksGridOptions.api!.deselectAll();
+                });
         } else {
             console.log("select a pick and a prospect");
         }
