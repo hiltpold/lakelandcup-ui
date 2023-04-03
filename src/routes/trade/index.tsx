@@ -32,6 +32,7 @@ export type DraftPick = {
 export type DraftPickView = {
     ID: string;
     Year: string;
+    PickID: string;
     Round: string;
     PickInRound: string;
     PickOverall: string;
@@ -60,7 +61,7 @@ export type Prospect = {
     };
 };
 
-export type ProspectView = {
+export type ProspectViewDraft = {
     ID: string;
     FullName: string;
     Franchise: string;
@@ -71,18 +72,40 @@ export type ProspectView = {
     PickID: string;
 };
 
-export type Trade = {
-    FromFranchiseID: string;
-    Picks: DraftPick[];
+export type ProspectViewTrade = {
+    ID: string;
+    FullName: string;
+    Franchise: string;
+    NhlTeam: string;
+    Birthdate: string;
+    LeagueID: string;
+    FranchiseID: string;
+    PickID: string;
+    Round: string;
+    PickInRound: string;
+    PickOverall: string;
+};
+
+export type TradePayload = {
+    FranchiseID: string;
+    Picks: string[];
     Prospects: string[];
-    ToFranchiseID: string;
+};
+
+export type Trade = {
+    First: TradePayload;
+    Second: TradePayload;
 };
 
 export const columnDefsProspect = [
+    { field: "ProspectID", hide: true },
     { field: "FullName" },
     { field: "Franchise" },
     { field: "FranchiseID", hide: true },
     { field: "PickID", hide: true },
+    { field: "Round", hide: false },
+    { field: "PickInRound", hide: false },
+    { field: "PickOverall", hide: false },
     { field: "NhlTeam" },
     { field: "Birthdate" },
 ];
@@ -90,6 +113,7 @@ export const columnDefsProspect = [
 export const columnDefsPicks = [
     { field: "ID", hide: true },
     { field: "Year" },
+    { field: "PickID", hide: true },
     { field: "Round" },
     { field: "PickInRound" },
     { field: "PickOverall" },
@@ -100,8 +124,7 @@ export const columnDefsPicks = [
     { field: "OriginID", hide: true },
     { field: "LastOwnerID", hide: true },
 ];
-
-export const gridOptionsPropspects = {
+export const gridOptionsProspects = {
     columnDefs: columnDefsProspect,
     rowData: [],
     rowHeight: 35,
@@ -117,133 +140,251 @@ export const gridOptionsPicks = {
     rowSelection: "multiple",
 } as GridOptions;
 
-const initialTrade = {
-    FromFranchiseID: "",
-    ToFranchiseID: "",
-    Picks: [],
-    Prospects: [],
-};
+export const gridOptionsProspectsFrom = {
+    columnDefs: columnDefsProspect,
+    rowData: [],
+    rowHeight: 35,
+    onSelectionChanged: undefined,
+    rowSelection: "multiple",
+} as GridOptions;
+
+export const gridOptionsPicksFrom = {
+    columnDefs: columnDefsPicks,
+    rowData: [],
+    rowHeight: 35,
+    onSelectionChanged: undefined,
+    rowSelection: "multiple",
+} as GridOptions;
+
+export const gridOptionsProspectsTo = {
+    columnDefs: columnDefsProspect,
+    rowData: [],
+    rowHeight: 35,
+    onSelectionChanged: undefined,
+    rowSelection: "multiple",
+} as GridOptions;
+
+export const gridOptionsPicksTo = {
+    columnDefs: columnDefsPicks,
+    rowData: [],
+    rowHeight: 35,
+    onSelectionChanged: undefined,
+    rowSelection: "multiple",
+} as GridOptions;
 
 const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
     users,
     league,
 }) => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
-    const [formData, setFormData] = useReducer(formReducer<Trade>, initialTrade);
-    const [franchises, setFranchises] = useState<Franchise[]>([]);
-    const [draftPicks, setDraftPicks] = useState<DraftPick[]>([]);
-    const [possibleFuturePicks, setPossibleFuturePicks] = useState(new Map<string, DraftPick[]>());
-
-    const [picksGridOptions, setPicksGridOptions] = useState<GridOptions>(gridOptionsPicks);
-    const [prospectsGridOptions, setProspectsGridOptions] =
-        useState<GridOptions>(gridOptionsPropspects);
-
-    const onSelectionChangedPicks = (params: any) => {
-        const selectedPick = params.api.getSelectedRows()[0] as DraftPick;
-        console.log(selectedPick);
-
-        setFormData({
-            type: FormEnum.Set,
-            payload: { name: "PickID", value: selectedPick.ID },
-        });
-    };
-
-    const onSelectionChangedProspects = (params: any) => {
-        const selectedRows = params.api.getSelectedRows();
-        console.log(selectedRows);
-    };
+    const [fromFranchise, setFromFranchise] = useState<string>("");
+    const [toFranchise, setToFranchise] = useState<string>("");
+    const [fromPicksGridOptions, setFromPicksGridOptions] =
+        useState<GridOptions>(gridOptionsPicksFrom);
+    const [fromProspectsGridOptions, setFromProspectsGridOptions] =
+        useState<GridOptions>(gridOptionsProspectsFrom);
+    const [toPicksGridOptions, setToPicksGridOptions] = useState<GridOptions>(gridOptionsPicksTo);
+    const [toProspectsGridOptions, setToProspectsGridOptions] =
+        useState<GridOptions>(gridOptionsProspectsTo);
 
     const handleFromFranchiseChange = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLSelectElement, Event>) => {
-        // generate picks
         const fID = currentTarget.value;
-        const picks = possibleFuturePicks.get(fID)!.map((p) => {
-            return {
-                DraftYear: p.DraftYear,
-                Round: p.DraftRound,
-                Owner: p.OwnerName,
-                OwnerID: p.OwnerID,
-                LastOwner: p.LastOwnerName,
-                LastOwnerID: p.LastOwnerID,
-                Origin: p.OriginName,
-                OriginID: p.OriginID,
-            };
-        });
-        console.log(picks);
-
-        setPicksGridOptions({ ...gridOptionsPicks, rowData: picks });
-        console.log(currentTarget.value);
+        setFromFranchise(fID);
+        // get picks
+        get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league!.ID}/franchise/${fID}/picks`)
+            .then((data) => {
+                if (data.picks !== undefined) {
+                    const picks = data.picks.map((p: DraftPick) => {
+                        return {
+                            ID: p.ID,
+                            Year: p.DraftYear,
+                            Round: p.DraftRound,
+                            PickInRound: p.DraftPickInRound,
+                            PickOverall: p.DraftPickOverall,
+                            Owner: p.OwnerName,
+                            OwnerID: p.OwnerID,
+                            LastOwner: p.LastOwnerName,
+                            LastOwnerID: p.LastOwnerID,
+                            Origin: p.OriginName,
+                            OriginID: p.OriginID,
+                        };
+                    });
+                    setFromPicksGridOptions({ ...fromPicksGridOptions, rowData: picks });
+                } else {
+                    setFromPicksGridOptions({ ...fromPicksGridOptions, rowData: [] });
+                }
+            })
+            .catch((error) => console.log(error));
+        // get prospects
+        get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league!.ID}/franchise/${fID}/prospects`)
+            .then((data) => {
+                console.log(data);
+                if (data.prospects !== undefined) {
+                    const prospects = data.prospects.map((p: Prospect) => {
+                        const f = league!.Franchises.find((f) => f.ID === fID);
+                        const fName = f !== undefined ? f.Name : "";
+                        return {
+                            ID: p.ID,
+                            FullName: p.FullName,
+                            Franchise: fName,
+                            NhlTeam: p.NhlTeam,
+                            Birthdate: p.Birthdate,
+                            Round: p.Pick.DraftRound,
+                            PickInRound: p.Pick.DraftPickInRound,
+                            PickOverall: p.Pick.DraftPickOverall,
+                        };
+                    });
+                    setFromProspectsGridOptions({
+                        ...fromProspectsGridOptions,
+                        rowData: prospects,
+                    });
+                } else {
+                    setFromProspectsGridOptions({ ...fromProspectsGridOptions, rowData: [] });
+                }
+            })
+            .catch((error) => console.log(error));
     };
+
     const handleToFranchiseChange = ({
         currentTarget,
-    }: JSX.TargetedEvent<HTMLInputElement | HTMLSelectElement, Event>) => {
-        console.log(currentTarget);
+    }: JSX.TargetedEvent<HTMLSelectElement, Event>) => {
+        const fID = currentTarget.value;
+        setToFranchise(fID);
+        // get picks
+        get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league!.ID}/franchise/${fID}/picks`)
+            .then((data) => {
+                if (data.picks !== undefined) {
+                    const picks = data.picks.map((p: DraftPick) => {
+                        return {
+                            ID: p.ID,
+                            Year: p.DraftYear,
+                            Round: p.DraftRound,
+                            PickInRound: p.DraftPickInRound,
+                            PickOverall: p.DraftPickOverall,
+                            Owner: p.OwnerName,
+                            OwnerID: p.OwnerID,
+                            LastOwner: p.LastOwnerName,
+                            LastOwnerID: p.LastOwnerID,
+                            Origin: p.OriginName,
+                            OriginID: p.OriginID,
+                        };
+                    });
+                    setToPicksGridOptions({ ...toPicksGridOptions, rowData: picks });
+                } else {
+                    setToPicksGridOptions({ ...toPicksGridOptions, rowData: [] });
+                }
+            })
+            .catch((error) => console.log(error));
+        // get prospects
+        get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league!.ID}/franchise/${fID}/prospects`)
+            .then((data) => {
+                console.log(data);
+                if (data.prospects !== undefined) {
+                    const prospects = data.prospects.map((p: Prospect) => {
+                        const f = league!.Franchises.find((f) => f.ID === fID);
+                        const fName = f !== undefined ? f.Name : "";
+                        return {
+                            ID: p.ID,
+                            FullName: p.FullName,
+                            Franchise: fName,
+                            NhlTeam: p.NhlTeam,
+                            Birthdate: p.Birthdate,
+                            Round: p.Pick.DraftRound,
+                            PickInRound: p.Pick.DraftPickInRound,
+                            PickOverall: p.Pick.DraftPickOverall,
+                        };
+                    });
+                    setToProspectsGridOptions({
+                        ...toProspectsGridOptions,
+                        rowData: prospects,
+                    });
+                } else {
+                    setToProspectsGridOptions({ ...toProspectsGridOptions, rowData: [] });
+                }
+            })
+            .catch((error) => console.log(error));
     };
 
     const handleTrade = (event: JSX.TargetedEvent<HTMLFormElement | HTMLButtonElement, Event>) => {
         event.preventDefault();
-        console.log(event);
+        // FROM
+        const fromPicksSelected = fromPicksGridOptions.api!.getSelectedRows() as DraftPick[];
+        const fromProspectsSelected = fromProspectsGridOptions.api!.getSelectedRows() as Prospect[];
+
+        let fromPicks = [] as string[];
+        let fromProspects = [] as string[];
+        if (fromPicksSelected.length > 0) {
+            fromPicks = fromPicksSelected.map((p) => p.ID);
+        }
+
+        if (fromProspectsSelected.length > 0) {
+            fromProspects = fromProspectsSelected.map((p) => p.ID);
+        }
+        const toPicksSelected = toPicksGridOptions.api!.getSelectedRows() as DraftPick[];
+        const toProspectsSelected = toProspectsGridOptions.api!.getSelectedRows() as Prospect[];
+
+        // to
+        let toPicks = [] as string[];
+        let toProspects = [] as string[];
+        if (toPicksSelected.length > 0) {
+            toPicks = toPicksSelected.map((p) => p.ID);
+        }
+
+        if (toProspectsSelected.length > 0) {
+            toProspects = toProspectsSelected.map((p) => p.ID);
+        }
+        console.log(toPicksSelected);
+        console.log(fromPicksSelected);
+        console.log(toProspectsSelected);
+        console.log(fromProspectsSelected);
+
+        const trade = {
+            First: {
+                FranchiseID: fromFranchise,
+                Picks: fromPicks,
+                Prospects: fromProspects,
+            },
+            Second: {
+                FranchiseID: toFranchise,
+                Picks: toPicks,
+                Prospects: toProspects,
+            },
+        } as Trade;
+        if (fromFranchise !== "" && toFranchise !== "" && fromFranchise !== toFranchise) {
+            // handle trade
+            console.log(trade);
+            if (league !== undefined) {
+                post(
+                    `${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchise/trade`,
+                    trade,
+                )
+                    .then((data) => {
+                        if (data.status == 201) {
+                            console.log(`API response code ${data.status}`);
+                        } else {
+                            // TODO: handle error api response
+                            console.log(`API response ${data}`);
+                        }
+                    })
+                    .catch((error) => console.log(error))
+                    .finally(() => {
+                        //remove from grid
+                        console.log("Finfally");
+                    });
+            } else {
+                // remove from grid if successful
+                console.log("select a pick and a prospect");
+            }
+        }
     };
 
     useEffect(() => {
         console.log("<Trade>");
+    }, [authenticated]);
 
-        // set handlers for AgGrid
-        setProspectsGridOptions({
-            ...prospectsGridOptions,
-            onSelectionChanged: onSelectionChangedPicks,
-        });
-
-        setPicksGridOptions({
-            ...prospectsGridOptions,
-            onSelectionChanged: onSelectionChangedProspects,
-        });
-
-        // get all franchises
-        if (league !== undefined && league !== null) {
-            get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchises`).then(
-                (data) => {
-                    if (data.result !== undefined) {
-                        console.log(data.result);
-                        setFranchises(data.result);
-                    }
-                },
-            );
-
-            // set possible future picks
-            const d = new Date();
-            let year = d.getFullYear();
-            const draftRounds = [1, 2];
-            const futureYears = [...Array(11)].map((v, i) => year + i);
-            futureYears.forEach((y) => {
-                league.Franchises.forEach((f) => {
-                    const p: DraftPick[] = draftRounds.map((r) => {
-                        const res: DraftPick = {
-                            ID: "",
-                            DraftYear: y.toString(),
-                            DraftRound: r.toString(),
-                            DraftPickInRound: "",
-                            DraftPickOverall: "",
-                            OwnerName: "",
-                            OwnerID: "",
-                            LastOwnerName: "",
-                            LastOwnerID: "",
-                            OriginName: "",
-                            OriginID: "",
-                        };
-                        return res;
-                    });
-                    possibleFuturePicks.has(f.ID)
-                        ? possibleFuturePicks.get(f.ID)!.push(...p)
-                        : possibleFuturePicks.set(f.ID, p);
-                });
-            });
-            console.log(possibleFuturePicks);
-        }
-    }, [authenticated, league]);
-
-    return (
+    return league !== undefined ? (
         <div className={`columns`}>
             <div
                 className={`column col-6 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.trade}`}
@@ -258,40 +399,68 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                             onChange={handleFromFranchiseChange}
                         >
                             <option value="">{""}</option>
-                            {franchises.map((f) => (
-                                <option value={f.ID}>{f.Name}</option>
-                            ))}
+                            {league !== undefined ? (
+                                league!.Franchises.map((f) => (
+                                    <option value={f.ID}>{f.Name}</option>
+                                ))
+                            ) : (
+                                <option value="">{""}</option>
+                            )}
                         </select>
                     </div>
                     <label className={`form-label ${style.label}`}>Availabe Picks</label>
-                    {picksGridOptions.rowData === null || picksGridOptions.rowData === undefined ? (
-                        // picksGridOptions.rowData.length === 0
+                    {fromPicksGridOptions.rowData === null ||
+                    fromPicksGridOptions.rowData === undefined ? (
+                        // fromPicksGridOptions.rowData.length === 0
                         <div></div>
                     ) : (
-                        <Grid gridOptions={picksGridOptions} />
+                        <Grid gridOptions={fromPicksGridOptions} />
                     )}
                     <label className={`form-label ${style.label}`}>Availabe Prospects</label>
-                    {prospectsGridOptions.rowData === null ||
-                    prospectsGridOptions.rowData === undefined ? (
-                        //prospectsGridOptions.rowData.length === 0
+                    {fromProspectsGridOptions.rowData === null ||
+                    fromProspectsGridOptions.rowData === undefined ? (
+                        //fromProspectsGridOptions.rowData.length === 0
                         <div></div>
                     ) : (
                         <div className="form-group">
-                            <Grid gridOptions={prospectsGridOptions} />
+                            <Grid gridOptions={fromProspectsGridOptions} />
                         </div>
                     )}
-                    <label className={`form-label ${style.label}`}>To Franchise</label>
-                    <select
-                        className={"form-select"}
-                        name="toFranchiseID"
-                        type="text"
-                        onChange={handleToFranchiseChange}
-                    >
-                        <option value="">{""}</option>
-                        {franchises.map((f) => (
-                            <option value={f.ID}>{f.Name}</option>
-                        ))}
-                    </select>
+                    <div style="padding-bottom:1rem"></div>
+                    <div className="form-group">
+                        <label className={`form-label ${style.label}`}>To Franchise</label>
+                        <select
+                            className={"form-select"}
+                            name="toFranchiseID"
+                            type="text"
+                            onChange={handleToFranchiseChange}
+                        >
+                            <option value="">{""}</option>
+                            {league !== undefined ? (
+                                league!.Franchises.map((f) => (
+                                    <option value={f.ID}>{f.Name}</option>
+                                ))
+                            ) : (
+                                <option value="">{""}</option>
+                            )}
+                        </select>
+                    </div>
+                    <label className={`to-label ${style.label}`}>Availabe Picks</label>
+                    {toPicksGridOptions.rowData === null ||
+                    toPicksGridOptions.rowData === undefined ? (
+                        <div></div>
+                    ) : (
+                        <Grid gridOptions={toPicksGridOptions} />
+                    )}
+                    <label className={`to-label ${style.label}`}>Availabe Prospects</label>
+                    {toProspectsGridOptions.rowData === null ||
+                    toProspectsGridOptions.rowData === undefined ? (
+                        <div></div>
+                    ) : (
+                        <div className="to-group">
+                            <Grid gridOptions={toProspectsGridOptions} />
+                        </div>
+                    )}
                     <div style="padding-bottom:1rem"></div>
                     <div className="form-horizontal">
                         <div className="form-group">
@@ -306,6 +475,8 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                 </form>
             </div>
         </div>
+    ) : (
+        <div class="loading"></div>
     );
 };
 export default Trade;

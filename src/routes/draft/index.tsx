@@ -13,10 +13,10 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import formValidator from "../../utils/validator";
 import {
-    gridOptionsPropspects,
+    gridOptionsProspects,
     gridOptionsPicks,
     Prospect,
-    ProspectView,
+    ProspectViewDraft,
     DraftPick,
     DraftPickView,
     columnDefsPicks,
@@ -52,7 +52,7 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     const [year, setYear] = useState<string>("");
 
     const [prospectsGridOptions, setProspectsGridOptions] =
-        useState<GridOptions>(gridOptionsPropspects);
+        useState<GridOptions>(gridOptionsProspects);
     const [picksGridOptions, setPicksGridOptions] = useState<GridOptions>({
         ...gridOptionsPicks,
         rowSelection: "single",
@@ -82,7 +82,7 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     };
 
     const onSelectionChangedProspects = (params: any) => {
-        const selectedProspect = params.api.getSelectedRows()[0] as ProspectView;
+        const selectedProspect = params.api.getSelectedRows()[0] as ProspectViewDraft;
         if (selectedProspect !== null && selectedProspect !== undefined) {
             setFormData({
                 type: FormEnum.Set,
@@ -198,7 +198,7 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                         });
                         const prospectsView = prospects.map(async (p: Prospect) => {
                             const pID = p.Pick.ID !== undefined ? p.Pick.ID : "";
-                            let tmp: ProspectView = {
+                            let tmp: ProspectViewDraft = {
                                 FullName: p.FullName,
                                 Franchise: "", //franchise !== undefined ? franchise : "",
                                 FranchiseID: "", //p.FranchiseID,
