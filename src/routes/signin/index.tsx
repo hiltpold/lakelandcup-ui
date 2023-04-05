@@ -43,16 +43,16 @@ const SignIn: FunctionalComponent = () => {
             post(`${process.env.BASE_URL_AUTH_SVC}/signin`, formData).then((data) => {
                 if (data.status == 200) {
                     setRedirect(true);
-                    setAuthenticated({ id: data.userId, state: true });
+                    setAuthenticated({ ID: data.userId, State: true, Role: data.role });
                 } else {
                     // TODO: handle error api response
-                    setAuthenticated({ id: "", state: false });
+                    setAuthenticated({ ID: "", State: false, Role: "" });
                     console.log(`API response code ${data.status}`);
                 }
             });
         }
     };
-    if (submitting == true && authenticated.state == true && redirect == true) {
+    if (submitting == true && authenticated.State == true && redirect == true) {
         return <Redirect to="/adminboard"></Redirect>;
     } else {
         return (

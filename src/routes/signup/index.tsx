@@ -34,7 +34,6 @@ const SignUp: FunctionalComponent = () => {
 
     const handleSubmit = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
         event.preventDefault();
-
         const passwordMatch = formData.password == formData.passwordConfirmation;
         const passwordhasLength = formData.password.length >= 8;
         const emailIsValid = isValidEmail(formData.email);
@@ -42,16 +41,18 @@ const SignUp: FunctionalComponent = () => {
 
         if (!submitting && passwordMatch && passwordhasLength && emailIsValid && namesAreValid) {
             setSubmitting(true);
-            post(`${process.env.BASE_URL_AUTH_SVC}/signup`, formData).then((data) => {
-                if (data.status == 201) {
-                    setRedirect(true);
-                }
-            });
+            post(`${process.env.BASE_URL_AUTH_SVC}/signup`, formData)
+                .then((data) => {
+                    if (data.status == 201) {
+                        setRedirect(true);
+                    }
+                })
+                .catch((error) => console.log(error));
         }
 
         setTimeout(() => {
             setSubmitting(false);
-        }, 3000);
+        }, 2000);
     };
 
     useEffect(() => {

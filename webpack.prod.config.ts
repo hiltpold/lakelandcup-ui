@@ -1,11 +1,9 @@
 import path from "path";
 import { Configuration, HotModuleReplacementPlugin, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
-import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ESLintPlugin from "eslint-webpack-plugin";
 import {} from "webpack-dev-server";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import dotenv from "dotenv";
 
 dotenv.config({
