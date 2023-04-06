@@ -77,7 +77,7 @@ const AdminBoard: FunctionalComponent = () => {
         });
     };
 
-    return authenticated ? ( //  &&league && (league.AdminID === authenticated.id || league.CommissionerID === authenticated.id)
+    return authenticated.ID !== "" && authenticated.Role == "admin" ? ( //  &&league && (league.AdminID === authenticated.id || league.CommissionerID === authenticated.id)
         <div className={`container`}>
             <div className="columns">
                 <div
