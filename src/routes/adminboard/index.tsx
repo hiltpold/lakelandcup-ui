@@ -9,14 +9,26 @@ import Trade from "../trade";
 import Franchise from "../franchise";
 import style from "./style.module.css";
 import { UserType, LeagueType } from "../../components/app";
-import { FranchiseFormType } from "../../utils/reducers";
 import SignIn from "../../routes/signin";
+import Redirect from "../../components/redirect";
 
 const AdminBoard: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     const [league, setLeague] = useState<LeagueType>();
-    const [franchises, setFranchises] = useState<FranchiseFormType[]>([]);
     const [users, setUsers] = useState<UserType[]>([]);
+
+    // TODO: correct type
+    const handleSignout = ({ currentTarget }: any) => {
+        // sign out
+        get(`${process.env.BASE_URL_AUTH_SVC}/signout`).then((data) => {
+            if (data.status == 200) {
+                setAuthenticated({ ID: "", State: false, Role: "" });
+            } else {
+                // TODO: handle error api response
+                console.log(`API response code ${data.status}`);
+            }
+        });
+    };
 
     useEffect(() => {
         console.log("<AdminBoard>");
@@ -48,79 +60,58 @@ const AdminBoard: FunctionalComponent = () => {
                 }
             })
             .catch((err) => console.log(err));
-
-        // get all franchises in this league, if league was already created
-        if (league !== undefined) {
-            get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchises`)
-                .then((data) => {
-                    if (data.status == 401 || data.result.length == 0) {
-                        // TODO: handle error api response
-                        console.log(`GET Franchises: API response code ${data.status}`);
-                    } else {
-                        setFranchises(data.result);
-                    }
-                })
-                .catch((err) => console.log(err));
-        }
     }, [authenticated]);
 
-    // TODO: correct type
-    const handleSignout = ({ currentTarget }: any) => {
-        // sign out
-        get(`${process.env.BASE_URL_AUTH_SVC}/signout`).then((data) => {
-            if (data.status == 200) {
-                setAuthenticated({ ID: "", State: false, Role: "" });
-            } else {
-                // TODO: handle error api response
-                console.log(`API response code ${data.status}`);
-            }
-        });
-    };
-
-    return authenticated.ID !== "" && authenticated.Role == "admin" ? ( //  &&league && (league.AdminID === authenticated.id || league.CommissionerID === authenticated.id)
-        <div className={`container`}>
-            <div className="columns">
-                <div
-                    className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.adminboard}`}
-                >
-                    <ul class="tab tab-block" style={"margin-bottom:0.5rem"}>
-                        <li class="tab-item">
-                            <a className="text-tiny" href="/adminboard/league">
-                                League
-                            </a>
-                        </li>
-                        <li class="tab-item">
-                            <a className="text-tiny" href="/adminboard/franchise">
-                                Franchise
-                            </a>
-                        </li>
-                        <li class="tab-item">
-                            <a className="text-tiny" href="/adminboard/draft">
-                                Draft
-                            </a>
-                        </li>
-                        <li class="tab-item">
-                            <a className="text-tiny" href="/adminboard/trade">
-                                Trade
-                            </a>
-                        </li>
-                        <li class="tab-item">
-                            <a className="text-error text-tiny" href="/" onClick={handleSignout}>
-                                Sign Out
-                            </a>
-                        </li>
-                    </ul>
+    if (authenticated.ID !== "" && authenticated.Role == "admin") {
+        return (
+            <div className={`container`}>
+                <div className="columns">
+                    <div
+                        className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.adminboard}`}
+                    >
+                        <ul class="tab tab-block" style={"margin-bottom:0.5rem"}>
+                            <li class="tab-item">
+                                <a className="text-tiny" href="/adminboard/league">
+                                    League
+                                </a>
+                            </li>
+                            <li class="tab-item">
+                                <a className="text-tiny" href="/adminboard/franchise">
+                                    Franchise
+                                </a>
+                            </li>
+                            <li class="tab-item">
+                                <a className="text-tiny" href="/adminboard/draft">
+                                    Draft
+                                </a>
+                            </li>
+                            <li class="tab-item">
+                                <a className="text-tiny" href="/adminboard/trade">
+                                    Trade
+                                </a>
+                            </li>
+                            <li class="tab-item">
+                                <a
+                                    className="text-error text-tiny"
+                                    href="/"
+                                    onClick={handleSignout}
+                                >
+                                    Sign Out
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+                <Router>
+                    <League path="/adminboard/league" users={users} league={league} />
+                    <Franchise path="/adminboard/franchise" users={users} league={league} />
+                    <Draft path="/adminboard/draft" users={users} league={league} />
+                    <Trade path="/adminboard/trade" users={users} league={league} />
+                </Router>
             </div>
-            <Router>
-                <League path="/adminboard/league" users={users} league={league} />
-                <Franchise path="/adminboard/franchise" users={users} league={league} />
-                <Draft path="/adminboard/draft" users={users} league={league} />
-                <Trade path="/adminboard/trade" users={users} league={league} />
-            </Router>
-        </div>
-    ) : (
-        <SignIn path="/signin" />
-    );
+        );
+    } else {
+        return <Redirect to="/signin"></Redirect>;
+    }
 };
 export default AdminBoard;

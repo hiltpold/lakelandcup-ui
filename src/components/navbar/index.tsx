@@ -12,7 +12,7 @@ const Navbar: FunctionalComponent = () => {
         <header className={`navbar ${style.navbar}`}>
             <section className="navbar-section"></section>
             <section className="navbar-center">
-                <a className="btn btn-link text-dark text-small" href="/league">
+                <a className="btn btn-link text-dark text-small" href="/fantasy">
                     Fantasy
                 </a>
                 <a className="btn btn-link text-dark text-small" href="/adminboard">

@@ -42,8 +42,18 @@ const SignIn: FunctionalComponent = () => {
             setSubmitting(true);
             post(`${process.env.BASE_URL_AUTH_SVC}/signin`, formData).then((data) => {
                 if (data.status == 200) {
+                    get(`${process.env.BASE_URL_AUTH_SVC}/user/info`)
+                        .then((data) => {
+                            if (data.status == 401) {
+                                // TODO: handle error api response
+                                console.log(`API response code ${data.status}`);
+                                setAuthenticated({ ID: "", State: false, Role: "" });
+                            } else {
+                                setAuthenticated({ ID: data.userId, State: true, Role: data.role });
+                            }
+                        })
+                        .catch((err) => console.log(err));
                     setRedirect(true);
-                    setAuthenticated({ ID: data.userId, State: true, Role: data.role });
                 } else {
                     // TODO: handle error api response
                     setAuthenticated({ ID: "", State: false, Role: "" });
