@@ -13,7 +13,7 @@ import Auth from "../contexts/auth";
 import Activation from "../routes/activation";
 import AdminBoard from "../routes/adminboard";
 import ProtectedRoute from "./protect";
-import Fantasy from "../contexts/fantasy";
+import Fantasy from "../routes/fantasy";
 import internal from "stream";
 
 export type UserType = {
@@ -51,16 +51,15 @@ const App: FunctionalComponent = () => {
             <Auth>
                 <Hero />
                 <Navbar />
-                <Fantasy>
-                    <Router>
-                        <Home path="/" />
-                        <SignIn path="/signin" />
-                        <SignUp path="/signup" />
-                        <Activation path="/activation" />
-                        <AdminBoard path="/adminboard/:rest*" />
-                        <NotFound default />
-                    </Router>
-                </Fantasy>
+                <Router>
+                    <Home path="/" />
+                    <SignIn path="/signin" />
+                    <SignUp path="/signup" />
+                    <Activation path="/activation" />
+                    <AdminBoard path="/adminboard/:rest*" />
+                    <Fantasy path="/fantasy/:rest*" />
+                    <NotFound default />
+                </Router>
             </Auth>
         </div>
     );

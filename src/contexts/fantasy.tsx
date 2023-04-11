@@ -47,7 +47,7 @@ export const FranchiseContext = createContext({} as IFranchiseContext);
 
 //export leagueReducer = (state, action)
 
-const Fantasy: FunctionalComponent = ({ children }) => {
+const FantasyContext: FunctionalComponent = ({ children }) => {
     const [leagueState, setLeagueState] = useState<ILeague>(initialLeague);
     /*
     <FranchiseContext.Provider value={{ franchiseState, setFranchiseState }}>
@@ -60,4 +60,4 @@ const Fantasy: FunctionalComponent = ({ children }) => {
         </LeagueContext.Provider>
     );
 };
-export default Fantasy;
+export default FantasyContext;
