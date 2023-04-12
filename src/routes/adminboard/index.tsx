@@ -110,6 +110,20 @@ const AdminBoard: FunctionalComponent = () => {
                 </Router>
             </div>
         );
+    } else if (authenticated.ID !== "" && authenticated.Role != "admin") {
+        return (
+            <div className={`container`}>
+                <div className="columns">
+                    <div
+                        className={`column col-4 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.adminboard}`}
+                    >
+                        <div class="toast text-center" style="margin-top:1rem">
+                            You are signed in, but you have no admin rights.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     } else {
         return <Redirect to="/signin"></Redirect>;
     }
