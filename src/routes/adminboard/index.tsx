@@ -2,7 +2,7 @@ import { FunctionalComponent, h } from "preact";
 import { Route, Router } from "preact-router";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { AuthContext } from "../../contexts/auth";
-import post, { get } from "../../utils/requests";
+import { get } from "../../utils/requests";
 import League from "../league";
 import Draft from "../draft";
 import Trade from "../trade";

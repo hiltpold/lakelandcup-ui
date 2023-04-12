@@ -42,6 +42,8 @@ const initDraftForm = {
     PickID: "",
 };
 
+const defaultErrMsg = "Select a Pick and Prospect";
+
 const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
     users,
     league,
@@ -50,6 +52,9 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     const [formData, setFormData] = useReducer(formReducer<DraftFormType>, initDraftForm);
     const [search, setSearch] = useState<string>("");
     const [year, setYear] = useState<string>("");
+    const [validDraft, setValidDraft] = useState<boolean>(false);
+    const [validUndraft, setValidUndraft] = useState<boolean>(false);
+    const [errMsg, setErrMsg] = useState<string>(defaultErrMsg);
 
     const [prospectsGridOptions, setProspectsGridOptions] =
         useState<GridOptions>(gridOptionsProspects);
@@ -203,6 +208,10 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                                 Franchise: "", //franchise !== undefined ? franchise : "",
                                 FranchiseID: "", //p.FranchiseID,
                                 PickID: pID,
+                                DraftYear: p.Pick.DraftYear,
+                                Round: p.Pick.DraftRound,
+                                PickInRound: p.Pick.DraftPickInRound,
+                                PickOverall: p.Pick.DraftPickOverall,
                                 Birthdate: p.Birthdate,
                                 NhlTeam: p.NhlTeam,
                                 ID: p.ID,
@@ -250,56 +259,64 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
     // Draft
 
     const handleDraft = (event: JSX.TargetedEvent<HTMLFormElement | HTMLButtonElement, Event>) => {
+        setValidUndraft(false);
         if (formValidator(formData) && league) {
-            console.log("Draft");
+            console.log("<HandleDraft>");
             post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/draft`, formData)
                 .then((data) => {
-                    if (data.status == 201) {
-                        console.log(`API response code ${data.status}`);
+                    if (data.status == 200) {
+                        console.log("API response:", data);
+                        setValidDraft(true);
+                        setTimeout(() => {
+                            setValidDraft(false);
+                        }, 3000);
+                        const selectedPick = picksGridOptions.api!.getSelectedRows();
+                        picksGridOptions.api!.applyTransaction({ remove: selectedPick });
+                        const selectedProspect = prospectsGridOptions.api!.getSelectedRows();
+                        prospectsGridOptions.api!.applyTransaction({ remove: selectedProspect });
+                        //
+                        prospectsGridOptions.api!.deselectAll();
+                        picksGridOptions.api!.deselectAll();
                     } else {
                         // TODO: handle error api response
-                        console.log(`API response ${data}`);
+                        console.log("API response:", data);
+                        setValidDraft(false);
                     }
                 })
-                .catch((error) => console.log(error))
-                .finally(() => {
-                    const selectedPick = picksGridOptions.api!.getSelectedRows();
-                    picksGridOptions.api!.applyTransaction({ remove: selectedPick });
-                    const selectedProspect = prospectsGridOptions.api!.getSelectedRows();
-                    prospectsGridOptions.api!.applyTransaction({ remove: selectedProspect });
-                    //
-                    prospectsGridOptions.api!.deselectAll();
-                    picksGridOptions.api!.deselectAll();
-                });
+                .catch((error) => console.log(error));
         } else {
-            console.log("select a pick and a prospect");
+            setValidDraft(false);
         }
     };
 
     const handleUndraft = (
         event: JSX.TargetedEvent<HTMLFormElement | HTMLButtonElement, Event>,
     ) => {
+        setValidDraft(false);
         if (formValidator(formData) && league) {
-            console.log("Undraft");
+            console.log("<HandleUndraft>");
             post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/undraft`, formData)
                 .then((data) => {
-                    if (data.status == 201) {
-                        console.log(`API response ${data}`);
+                    if (data.status == 200) {
+                        console.log("API response:", data);
+                        setValidUndraft(true);
+                        setTimeout(() => {
+                            setValidUndraft(false);
+                        }, 3000);
+                        const selectedProspect = prospectsGridOptions.api!.getSelectedRows();
+                        prospectsGridOptions.api!.applyTransaction({ remove: selectedProspect });
+                        //
+                        prospectsGridOptions.api!.deselectAll();
+                        picksGridOptions.api!.deselectAll();
                     } else {
                         // TODO: handle error api response
-                        console.log(`API response ${data}`);
+                        console.log("API response:", data);
+                        setValidUndraft(false);
                     }
                 })
-                .catch((error) => console.log(error))
-                .finally(() => {
-                    const selectedProspect = prospectsGridOptions.api!.getSelectedRows();
-                    prospectsGridOptions.api!.applyTransaction({ remove: selectedProspect });
-                    //
-                    prospectsGridOptions.api!.deselectAll();
-                    picksGridOptions.api!.deselectAll();
-                });
+                .catch((error) => console.log(error));
         } else {
-            console.log("select a pick and a prospect");
+            setValidUndraft(false);
         }
     };
 
@@ -381,12 +398,50 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                 )}
                 <div class="divider"></div>
                 <div class="divider"></div>
-                <button className="btn" onClick={handleDraft}>
-                    Draft
-                </button>
-                <button className="btn" onClick={handleUndraft}>
-                    Undraft
-                </button>
+                {validDraft ? (
+                    <div>
+                        <b>
+                            <div class="text-success">Drafted Prospect</div>
+                        </b>
+                        <div class="divider"></div>
+                    </div>
+                ) : (
+                    <div></div>
+                )}
+                {validUndraft ? (
+                    <div>
+                        <b>
+                            <div class="text-success">Undrafted Prospect</div>
+                        </b>
+                        <div class="divider"></div>
+                    </div>
+                ) : (
+                    <div></div>
+                )}
+                {!validDraft && !validUndraft ? (
+                    <div>
+                        <b>
+                            <div class="text-error">{errMsg}</div>
+                        </b>
+                        <div class="divider"></div>
+                    </div>
+                ) : (
+                    <div></div>
+                )}
+                <div className="form-horizontal">
+                    <div className="form-group">
+                        <div className="col-3 col-mr-auto">
+                            <button className="col-12 btn btn-primary" onClick={handleDraft}>
+                                Draft
+                            </button>
+                        </div>
+                        <div className="col-3">
+                            <button className="col-12 btn btn-error" onClick={handleUndraft}>
+                                Undo Draft
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

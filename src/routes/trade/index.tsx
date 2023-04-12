@@ -65,6 +65,10 @@ export type ProspectViewDraft = {
     ID: string;
     FullName: string;
     Franchise: string;
+    DraftYear: string;
+    Round: string;
+    PickInRound: string;
+    PickOverall: string;
     NhlTeam: string;
     Birthdate: string;
     LeagueID: string;
@@ -81,6 +85,7 @@ export type ProspectViewTrade = {
     LeagueID: string;
     FranchiseID: string;
     PickID: string;
+    DraftYear: string;
     Round: string;
     PickInRound: string;
     PickOverall: string;
@@ -103,6 +108,7 @@ export const columnDefsProspect = [
     { field: "Franchise" },
     { field: "FranchiseID", hide: true },
     { field: "PickID", hide: true },
+    { field: "DraftYear", hide: false },
     { field: "Round", hide: false },
     { field: "PickInRound", hide: false },
     { field: "PickOverall", hide: false },
@@ -172,11 +178,16 @@ export const gridOptionsPicksTo = {
     rowSelection: "multiple",
 } as GridOptions;
 
+const defaultErrMsg = "Select Picks|Prospects to Trade";
+
 const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefined }> = ({
     users,
     league,
 }) => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
+    const [validTrade, setValidTrade] = useState<boolean>(false);
+    const [errMsg, setErrMsg] = useState<string>(defaultErrMsg);
+
     const [fromFranchise, setFromFranchise] = useState<string>("");
     const [toFranchise, setToFranchise] = useState<string>("");
     const [fromPicksGridOptions, setFromPicksGridOptions] =
@@ -220,7 +231,6 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
         // get prospects
         get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league!.ID}/franchise/${fID}/prospects`)
             .then((data) => {
-                console.log(data);
                 if (data.prospects !== undefined) {
                     const prospects = data.prospects.map((p: Prospect) => {
                         const f = league!.Franchises.find((f) => f.ID === fID);
@@ -229,11 +239,12 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                             ID: p.ID,
                             FullName: p.FullName,
                             Franchise: fName,
-                            NhlTeam: p.NhlTeam,
-                            Birthdate: p.Birthdate,
+                            DraftYear: p.Pick.DraftYear,
                             Round: p.Pick.DraftRound,
                             PickInRound: p.Pick.DraftPickInRound,
                             PickOverall: p.Pick.DraftPickOverall,
+                            NhlTeam: p.NhlTeam,
+                            Birthdate: p.Birthdate,
                         };
                     });
                     setFromProspectsGridOptions({
@@ -280,7 +291,6 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
         // get prospects
         get(`${process.env.BASE_URL_FANTASY_SVC}/league/${league!.ID}/franchise/${fID}/prospects`)
             .then((data) => {
-                console.log(data);
                 if (data.prospects !== undefined) {
                     const prospects = data.prospects.map((p: Prospect) => {
                         const f = league!.Franchises.find((f) => f.ID === fID);
@@ -289,12 +299,13 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                             ID: p.ID,
                             FullName: p.FullName,
                             Franchise: fName,
-                            NhlTeam: p.NhlTeam,
-                            Birthdate: p.Birthdate,
+                            DraftYear: p.Pick.DraftYear,
                             Round: p.Pick.DraftRound,
                             PickInRound: p.Pick.DraftPickInRound,
                             PickOverall: p.Pick.DraftPickOverall,
-                        };
+                            NhlTeam: p.NhlTeam,
+                            Birthdate: p.Birthdate,
+                        } as ProspectViewTrade;
                     });
                     setToProspectsGridOptions({
                         ...toProspectsGridOptions,
@@ -335,10 +346,6 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
         if (toProspectsSelected.length > 0) {
             toProspects = toProspectsSelected.map((p) => p.ID);
         }
-        console.log(toPicksSelected);
-        console.log(fromPicksSelected);
-        console.log(toProspectsSelected);
-        console.log(fromProspectsSelected);
 
         const trade = {
             First: {
@@ -354,28 +361,48 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
         } as Trade;
         if (fromFranchise !== "" && toFranchise !== "" && fromFranchise !== toFranchise) {
             // handle trade
-            console.log(trade);
             if (league !== undefined) {
                 post(
                     `${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/franchise/trade`,
                     trade,
                 )
                     .then((data) => {
-                        if (data.status == 201) {
-                            console.log(`API response code ${data.status}`);
+                        if (data.status == 200) {
+                            console.log("API response:", data);
+                            setValidTrade(true);
+                            setTimeout(() => {
+                                setValidTrade(false);
+                            }, 3000);
                         } else {
                             // TODO: handle error api response
-                            console.log(`API response ${data}`);
+                            console.log("API response:", data);
+                            setValidTrade(false);
+                            setErrMsg("Could not Trade Picks|Prospects");
+                            setTimeout(() => {
+                                setErrMsg(defaultErrMsg);
+                            }, 3000);
                         }
                     })
                     .catch((error) => console.log(error))
                     .finally(() => {
                         //remove from grid
-                        console.log("Finfally");
+                        const selectedFromProspects =
+                            fromProspectsGridOptions.api!.getSelectedRows();
+                        const selectedToProspects = toProspectsGridOptions.api!.getSelectedRows();
+                        fromProspectsGridOptions.api!.applyTransaction({
+                            remove: selectedFromProspects,
+                        });
+                        toProspectsGridOptions.api!.applyTransaction({
+                            remove: selectedToProspects,
+                        });
+
+                        const selectedFromPicks = fromPicksGridOptions.api!.getSelectedRows();
+                        const selectedToPicks = toPicksGridOptions.api!.getSelectedRows();
+                        fromPicksGridOptions.api!.applyTransaction({ remove: selectedFromPicks });
+                        toPicksGridOptions.api!.applyTransaction({ remove: selectedToPicks });
                     });
             } else {
-                // remove from grid if successful
-                console.log("select a pick and a prospect");
+                setValidTrade(false);
             }
         }
     };
@@ -391,7 +418,7 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
             >
                 <form onSubmit={handleTrade}>
                     <div className="form-group">
-                        <label className={`form-label ${style.label}`}>From Franchise</label>
+                        <label className={`form-label ${style.label}`}>First Franchise</label>
                         <select
                             className={"form-select"}
                             name="fromFranchiseID"
@@ -428,7 +455,7 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                     )}
                     <div style="padding-bottom:1rem"></div>
                     <div className="form-group">
-                        <label className={`form-label ${style.label}`}>To Franchise</label>
+                        <label className={`form-label ${style.label}`}>Second Franchise</label>
                         <select
                             className={"form-select"}
                             name="toFranchiseID"
@@ -462,13 +489,25 @@ const Trade: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                         </div>
                     )}
                     <div style="padding-bottom:1rem"></div>
+                    {!validTrade ? (
+                        <div>
+                            <b>
+                                <div class="text-error">{errMsg}</div>
+                            </b>
+                            <div class="divider"></div>
+                        </div>
+                    ) : (
+                        <div>
+                            <b>
+                                <div class="text-success">Traded Picks|Prospects</div>
+                            </b>
+                            <div class="divider"></div>
+                        </div>
+                    )}
                     <div className="form-horizontal">
                         <div className="form-group">
                             <div className="col-3 col-mr-auto">
                                 <button className="col-12 btn btn-primary">Trade</button>
-                            </div>
-                            <div className="col-3">
-                                <button className="col-12 btn btn-error">Undo Trade</button>
                             </div>
                         </div>
                     </div>

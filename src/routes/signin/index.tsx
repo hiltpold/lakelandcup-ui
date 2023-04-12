@@ -18,6 +18,7 @@ const initialSignInState = {
 const SignIn: FunctionalComponent = () => {
     const { authenticated, setAuthenticated } = useContext(AuthContext);
     const [redirect, setRedirect] = useState<boolean>(false);
+    const [wrongCredentials, setWrongCredentials] = useState<boolean | undefined>(undefined);
     const [formData, setFormData] = useReducer(formReducer<SigninType>, initialSignInState);
     const [submitting, setSubmitting] = useState<boolean>(false);
 
@@ -48,21 +49,27 @@ const SignIn: FunctionalComponent = () => {
                                 // TODO: handle error api response
                                 console.log(`API response code ${data.status}`);
                                 setAuthenticated({ ID: "", State: false, Role: "" });
+                                setWrongCredentials(true);
                             } else {
                                 setAuthenticated({ ID: data.userId, State: true, Role: data.role });
+                                setWrongCredentials(false);
                             }
                         })
                         .catch((err) => console.log(err));
                     setRedirect(true);
                 } else {
-                    // TODO: handle error api response
-                    setAuthenticated({ ID: "", State: false, Role: "" });
                     console.log(`API response code ${data.status}`);
+                    // TODO: handle error api response
+                    setSubmitting(false);
+                    setWrongCredentials(true);
+                    setAuthenticated({ ID: "", State: false, Role: "" });
                 }
             });
+        } else {
+            setWrongCredentials(true);
         }
     };
-    if (submitting == true && authenticated.State == true && redirect == true) {
+    if (authenticated.State == true && redirect == true) {
         return <Redirect to="/adminboard"></Redirect>;
     } else {
         return (
@@ -89,6 +96,17 @@ const SignIn: FunctionalComponent = () => {
                                         onChange={handleChange}
                                     />
                                 </label>
+                                {wrongCredentials ? (
+                                    <div>
+                                        <b>
+                                            <span class="text-error">
+                                                Invalid email or password
+                                            </span>
+                                        </b>
+                                    </div>
+                                ) : (
+                                    <div></div>
+                                )}
                                 <label className="form-label">
                                     <button className="btn" onClick={() => {}}>
                                         Sign In

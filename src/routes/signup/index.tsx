@@ -1,4 +1,3 @@
-import { request } from "https";
 import preact, { FunctionalComponent, h, JSX } from "preact";
 import { useState, useEffect, useReducer } from "preact/hooks";
 import Redirect from "../../components/redirect";
