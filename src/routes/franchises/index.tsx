@@ -77,24 +77,24 @@ export type ProspectView = {
 };
 
 const columnDefsProspect = [
-    { field: "FullName" },
-    { field: "Franchise" },
-    { field: "DraftYear" },
-    { field: "Round" },
-    { field: "PickInRound" },
-    { field: "PickOverall" },
-    { field: "Protected" },
-    { field: "Birthdate" },
+    { field: "FullName", minWidth: 175, suppressSizeToFit: true },
+    { field: "Franchise", minWidth: 175, suppressSizeToFit: true },
+    { field: "DraftYear", minWidth: 105, suppressSizeToFit: true },
+    { field: "Round", minWidth: 80, suppressSizeToFit: true },
+    { field: "PickInRound", minWidth: 125, suppressSizeToFit: true },
+    { field: "PickOverall", minWidth: 125, suppressSizeToFit: true },
+    { field: "Protected", minWidth: 125, suppressSizeToFit: true },
+    { field: "Birthdate", minWidth: 125, suppressSizeToFit: true },
 ];
 
 export const columnDefsPicks = [
-    { field: "DraftYear" },
-    { field: "Round" },
-    { field: "PickInRound" },
-    { field: "PickOverall" },
-    { field: "Owner" },
-    { field: "LastOwner" },
-    { field: "Origin" },
+    { field: "DraftYear", minWidth: 105, suppressSizeToFit: true },
+    { field: "Round", minWidth: 80, suppressSizeToFit: true },
+    { field: "PickInRound", minWidth: 125, suppressSizeToFit: true },
+    { field: "PickOverall", minWidth: 125, suppressSizeToFit: true },
+    { field: "Owner", minWidth: 175, suppressSizeToFit: true },
+    { field: "LastOwner", minWidth: 175, suppressSizeToFit: true },
+    { field: "Origin", minWidth: 175, suppressSizeToFit: true },
 ];
 
 const gridOptionsProspects = {

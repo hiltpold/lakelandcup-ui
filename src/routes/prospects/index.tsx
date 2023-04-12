@@ -46,21 +46,20 @@ type ProspectView = {
 };
 
 const columnDefsProspect = [
-    { field: "FullName" },
-    { field: "Franchise" },
-    { field: "DraftYear" },
-    { field: "Round" },
-    { field: "PickInRound" },
-    { field: "PickOverall" },
-    { field: "Protected" },
-    { field: "Birthdate" },
+    { field: "FullName", minWidth: 175, suppressSizeToFit: true },
+    { field: "Franchise", minWidth: 175, suppressSizeToFit: true },
+    { field: "DraftYear", minWidth: 105, suppressSizeToFit: true },
+    { field: "Round", minWidth: 80, suppressSizeToFit: true },
+    { field: "PickInRound", minWidth: 125, suppressSizeToFit: true },
+    { field: "PickOverall", minWidth: 125, suppressSizeToFit: true },
+    { field: "Protected", minWidth: 125, suppressSizeToFit: true },
+    { field: "Birthdate", minWidth: 125, suppressSizeToFit: true },
 ];
 
 const gridOptionsProspects = {
     columnDefs: columnDefsProspect,
     rowData: [],
     rowHeight: 35,
-    onSelectionChanged: undefined,
 } as GridOptions;
 
 const Prospects: FunctionComponent = () => {
@@ -71,12 +70,12 @@ const Prospects: FunctionComponent = () => {
     const displayProspectsGrid = () => {
         get(`${process.env.BASE_URL_FANTASY_SVC}/prospect/${encodeURIComponent(search)}`)
             .then((data) => {
+                console.log(">>", data);
                 if (data.status != 200) {
                     // TODO: handle error api response
-                    console.log(`API response code ${data.status}`);
+                    console.log("API response", data);
                 } else {
                     if (data.prospects && data.prospects.length >= 0) {
-                        console.log(data.prospects);
                         const prospects = data.prospects.map((p: Prospect) => {
                             return {
                                 ID: p.ID,
@@ -122,10 +121,16 @@ const Prospects: FunctionComponent = () => {
                             return tmp;
                         });
                         Promise.all(prospectsView).then((pv) => {
-                            setProspectsGridOptions({ ...prospectsGridOptions, rowData: pv });
+                            setProspectsGridOptions({
+                                ...prospectsGridOptions,
+                                rowData: pv,
+                            });
                         });
                     } else {
-                        setProspectsGridOptions({ ...prospectsGridOptions, rowData: [] });
+                        setProspectsGridOptions({
+                            ...prospectsGridOptions,
+                            rowData: [],
+                        });
                     }
                 }
             })
@@ -134,7 +139,7 @@ const Prospects: FunctionComponent = () => {
             });
     };
     const handleProspectsOnKeyUp = (e: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
-        e.preventDefault();
+        //e.preventDefault();
         if (e.key == "Enter" && search.length > 0) {
             displayProspectsGrid();
         } else if (e.key == "Enter" && search.length == 0) {
@@ -160,7 +165,7 @@ const Prospects: FunctionComponent = () => {
     return (
         <div className={`columns`}>
             <div
-                className={`column col-6 col-mx-auto col-xs-12 col-sm-12 col-md-6 col-lg-4 col-xl-4 ${style.prospects}`}
+                className={`column col-6 col-mx-auto col-xs-12 col-sm-12 col-md-8 col-lg-12 col-xl-6 ${style.prospects}`}
             >
                 <div className="form-horizontal">
                     <div className="form-group">
