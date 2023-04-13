@@ -6,11 +6,11 @@ const Home: FunctionalComponent = () => {
             <div className="columns">
                 <div className=" ">
                     {" "}
-                    This website is home to the legendary <b>Lakelandcup</b>, a fantasy hockey
-                    league with a rich tradition that was founded 2012. The franchise owners take
-                    pride in being the best managers possible and have been expanding the game
-                    beyond the limits of traditional platforms. To keep track of picks and
-                    prospects, the franchise owners created this website.
+                    This is the home of the legendary <b>Lakelandcup</b>, a fantasy hockey league
+                    with a proud tradition since its founding in 2012. Our franchise owners are
+                    dedicated to excellence and are always looking for new ways to expand the game
+                    beyond traditional platforms. As a result, this website was created to track
+                    picks and prospects. Join us and become a part of the Lakelandcup legacy!
                 </div>
             </div>
         </div>
