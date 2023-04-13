@@ -1,12 +1,19 @@
-import { FunctionalComponent, h } from 'preact';
+import { FunctionalComponent, h } from "preact";
 import style from "./style.module.css";
-const Home: FunctionalComponent = () =>   {
+const Home: FunctionalComponent = () => {
     return (
         <div className={`${style.home} container grid-md`}>
             <div className="columns">
-            <div className=" "> This is the home of the legendary <b>Lakelandcup</b>. Founded over 10 years ago the Lakelandcup has a rich tradition and franchise owners take pride in being the best managers possible. Many moons ago, the franchise owners decided to extend the game of fantasy hockey over the limits provided by Yahoo. Consequently, the the bookkeeping of picks and prospects had to be managed externally. This was the starting point of this website.</div>
+                <div className=" ">
+                    {" "}
+                    This website is home to the legendary <b>Lakelandcup</b>, a fantasy hockey
+                    league with a rich tradition that was founded 2012. The franchise owners take
+                    pride in being the best managers possible and have been expanding the game
+                    beyond the limits of traditional platforms. To keep track of picks and
+                    prospects, the franchise owners created this website.
+                </div>
             </div>
         </div>
     );
-}
+};
 export default Home;
