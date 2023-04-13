@@ -242,7 +242,7 @@ const Franchises: FunctionComponent = () => {
             </div>
         </div>
     ) : (
-        <div class="loading"></div>
+        <div class="loading" style="margin-top:1rem"></div>
     );
 };
 export default Franchises;
