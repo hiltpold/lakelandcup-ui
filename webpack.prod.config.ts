@@ -4,6 +4,7 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import ESLintPlugin from "eslint-webpack-plugin";
 import {} from "webpack-dev-server";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import TerserPlugin from "terser-webpack-plugin";
 import dotenv from "dotenv";
 
 dotenv.config({
@@ -69,6 +70,12 @@ const config: Configuration = {
             chunks: "all",
         },
         minimize: true,
+        minimizer: [new TerserPlugin()],
+    },
+    performance: {
+        hints: false,
+        maxEntrypointSize: 512000,
+        maxAssetSize: 512000,
     },
 };
 export default config;

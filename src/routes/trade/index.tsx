@@ -130,21 +130,6 @@ export const columnDefsPicks = [
     { field: "OriginID", hide: true },
     { field: "LastOwnerID", hide: true },
 ];
-export const gridOptionsProspects = {
-    columnDefs: columnDefsProspect,
-    rowData: [],
-    rowHeight: 35,
-    onSelectionChanged: undefined,
-    rowSelection: "multiple",
-} as GridOptions;
-
-export const gridOptionsPicks = {
-    columnDefs: columnDefsPicks,
-    rowData: [],
-    rowHeight: 35,
-    onSelectionChanged: undefined,
-    rowSelection: "multiple",
-} as GridOptions;
 
 export const gridOptionsProspectsFrom = {
     columnDefs: columnDefsProspect,

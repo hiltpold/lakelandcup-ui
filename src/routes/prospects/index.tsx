@@ -47,12 +47,12 @@ type ProspectView = {
 
 const columnDefsProspect = [
     { field: "FullName", minWidth: 175, suppressSizeToFit: true },
+    { field: "Protected", minWidth: 125, suppressSizeToFit: true },
     { field: "Franchise", minWidth: 175, suppressSizeToFit: true },
     { field: "DraftYear", minWidth: 105, suppressSizeToFit: true },
     { field: "Round", minWidth: 80, suppressSizeToFit: true },
     { field: "PickInRound", minWidth: 125, suppressSizeToFit: true },
     { field: "PickOverall", minWidth: 125, suppressSizeToFit: true },
-    { field: "Protected", minWidth: 125, suppressSizeToFit: true },
     { field: "Birthdate", minWidth: 125, suppressSizeToFit: true },
 ];
 

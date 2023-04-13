@@ -13,8 +13,6 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import formValidator from "../../utils/validator";
 import {
-    gridOptionsProspects,
-    gridOptionsPicks,
     Prospect,
     ProspectViewDraft,
     DraftPick,
@@ -34,6 +32,22 @@ export type DraftFormType = {
     FranchiseID: string;
     LeagueID: string;
 };
+
+const gridOptionsProspects = {
+    columnDefs: columnDefsProspect,
+    rowData: [],
+    rowHeight: 35,
+    onSelectionChanged: undefined,
+    rowSelection: "single",
+} as GridOptions;
+
+const gridOptionsPicks = {
+    columnDefs: columnDefsPicks,
+    rowData: [],
+    rowHeight: 35,
+    onSelectionChanged: undefined,
+    rowSelection: "single",
+} as GridOptions;
 
 const initDraftForm = {
     LeagueID: "",
@@ -281,6 +295,10 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                         // TODO: handle error api response
                         console.log("API response:", data);
                         setValidDraft(false);
+                        setErrMsg(`Draft was not successful: ${data.error}`);
+                        setTimeout(() => {
+                            setErrMsg(defaultErrMsg);
+                        }, 3000);
                     }
                 })
                 .catch((error) => console.log(error));
@@ -312,6 +330,10 @@ const Draft: FunctionComponent<{ users: UserType[]; league: LeagueType | undefin
                         // TODO: handle error api response
                         console.log("API response:", data);
                         setValidUndraft(false);
+                        setErrMsg(`Draft was not successful: ${data.error}`);
+                        setTimeout(() => {
+                            setErrMsg(defaultErrMsg);
+                        }, 3000);
                     }
                 })
                 .catch((error) => console.log(error));

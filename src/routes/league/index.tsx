@@ -16,7 +16,7 @@ export type DraftLottery = {
     FranchiseID: string;
     Owner: string;
     Year: string;
-    LotteryPosition: bigint | string | null;
+    LotteryPosition: number | string | null;
 };
 
 const initialLeague = {
@@ -26,11 +26,11 @@ const initialLeague = {
     CommissionerID: "",
     Commissioner: "",
     FoundationYear: "",
-    MaxFranchises: 0,
-    MaxProspects: 0,
-    DraftRightsSkater: 0,
-    DraftRightsGoalie: 0,
-    DraftRounds: 0,
+    MaxFranchises: null,
+    MaxProspects: null,
+    DraftRightsSkater: null,
+    DraftRightsGoalie: null,
+    DraftRounds: null,
 };
 
 const columnDefsLottery = [
@@ -114,10 +114,10 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                 // send league creation data to backend
                 post(`${process.env.BASE_URL_FANTASY_SVC}/league`, formData).then((data) => {
                     if (data.status == 201) {
-                        console.log(`API response code ${data.status}`);
+                        console.log("API response", data.status);
                     } else {
                         // TODO: handle error api response
-                        console.log(`API response code ${data.status}`);
+                        console.log("API response", data.status);
                     }
                 });
             } else {
@@ -151,38 +151,50 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                 }
                 return acc;
             }, {});
-            // send update to fantasy backend
-            post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}`, update).then((data) => {
-                if (data.status == 201) {
-                    console.log(`API response code ${data.status}`);
-                } else {
-                    // TODO: handle error api response
-                    console.log(`API response code ${data.status}`);
-                }
-            });
-        }
-    };
-
-    const handleUpdateLottery = (event: JSX.TargetedEvent<HTMLFormElement, Event>) => {
-        event.preventDefault();
-        if (league !== undefined) {
-            const update = { LeagueID: league.ID, Picks: formDataLottery };
-            // send update to fantasy backend
-            const isTrue = formDataLottery.map((d) => formValidator(d)).every((v) => v === true);
-            if (isTrue) {
-                post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/picks`, update).then(
+            if (formValidator(update as LeagueFormType)) {
+                // send update to fantasy backend
+                post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}`, update).then(
                     (data) => {
                         if (data.status == 201) {
-                            console.log(`API response code ${data.status}`);
+                            console.log("API response", data);
                         } else {
                             // TODO: handle error api response
-                            console.log(`API response code ${data.status}`);
-                            console.log(data.error);
+                            console.log("API response", data);
                         }
                     },
                 );
+            }
+        }
+    };
+
+    const handleUpdateLottery = (event: JSX.TargetedEvent<HTMLFormElement, Event> | any) => {
+        event.preventDefault();
+        if (league !== undefined) {
+            // send update to fantasy backend
+            const isValid = formDataLottery.map((d) => formValidator(d)).every((v) => v === true);
+            let update = {};
+            if (isValid && event.submitter.name == "create") {
+                const t = formDataLottery.map((l) => {
+                    return { ...l, LotteryPosition: 0 } as DraftLottery;
+                });
+                update = { LeagueID: league.ID, Picks: t };
+            } else if (isValid && event.submitter.name == "lottery") {
+                update = { LeagueID: league.ID, Picks: formDataLottery };
             } else {
-                console.error("Please select a year!");
+                console.log("<League: Nothing done. Please select a valid year>");
+            }
+
+            if (Object.keys(update).length !== 0) {
+                post(`${process.env.BASE_URL_FANTASY_SVC}/league/${league.ID}/picks`, update).then(
+                    (data) => {
+                        if (data.status == 201) {
+                            console.log("API response", data);
+                        } else {
+                            // TODO: handle error api response
+                            console.log("API response ", data);
+                        }
+                    },
+                );
             }
         }
     };
@@ -190,11 +202,15 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
     const handleChangeDraftYear = ({
         currentTarget,
     }: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+        const y = currentTarget.value;
+        const validYear =
+            y.length == 4 && parseInt(y) >= 2000 && parseInt(y) <= 2099 ? true : false;
+        const year = validYear ? y : "";
         if (gridOptionsLottery.rowData !== null && gridOptionsLottery.rowData !== undefined) {
             const tmp = gridOptionsLottery.rowData.map((r) => {
                 return {
                     ...r,
-                    Year: currentTarget.value,
+                    Year: year,
                 } as DraftLottery;
             });
             setGridOptionsLottery({ ...gridOptionsLottery, rowData: tmp });
@@ -221,7 +237,6 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                     FranchiseID: f.ID,
                 };
             });
-            console.log(league.Franchises);
             setGridOptionsLottery({
                 ...gridOptionsLottery,
                 rowData: rowData,
@@ -379,9 +394,43 @@ const League: FunctionalComponent<{ users: UserType[]; league: LeagueType | unde
                     <label className={`form-label ${style.label}`}>Fix Draft Lottery</label>
                     <form onSubmit={handleUpdateLottery}>
                         <Grid gridOptions={gridOptionsLottery} />
-                        <label className="form-label">
-                            <button className="btn">Update</button>
-                        </label>
+                        <div className="form-horizontal" style="margin-top:0.5rem">
+                            <div className="form-group">
+                                <div className="col-3 col-mr-auto">
+                                    <div class="popover" style="display:block">
+                                        <button className="col-12 btn btn-primary" name="create">
+                                            Create
+                                        </button>
+                                        <div class="popover-container">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    will either create or update picks neglecting
+                                                    the lottery position.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-3" style="">
+                                    <div class="popover" style="display:block">
+                                        <button
+                                            className="col-12 btn btn-error float-right"
+                                            name="lottery"
+                                        >
+                                            Lottery
+                                        </button>
+                                        <div class="popover-container">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    will either create or update picks and taking
+                                                    into account the displayed lottery position.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
             ) : (
